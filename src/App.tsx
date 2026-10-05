@@ -255,7 +255,7 @@ function App() {
 
 type AdminPanelProps = {
   posts: Post[];
-  onRefresh: () => void;
+  onRefresh: () => void | Promise<void>;
   onLogout: () => void;
 };
 
@@ -279,25 +279,21 @@ function AdminPanel({
 
       const base64 = await fileToBase64(image);
 
-      const payload = JSON.stringify({
-        action: "upload",
-        adminKey: ADMIN_KEY,
-        imageBase64: base64,
-        mimeType: image.type,
-        caption,
-      });
-
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "text/plain;charset=utf-8",
         },
-        body: payload,
+        body: JSON.stringify({
+          action: "upload",
+          adminKey: ADMIN_KEY,
+          imageBase64: base64,
+          mimeType: image.type,
+          caption,
+        }),
       });
 
       const text = await response.text();
-
-      console.log("Upload response:", text);
 
       let data;
 
@@ -305,7 +301,7 @@ function AdminPanel({
         data = JSON.parse(text);
       } catch {
         throw new Error(
-          `Response server tidak valid: ${text.substring(0, 300)}`
+          `Server mengirim response yang tidak valid.`
         );
       }
 
@@ -336,7 +332,7 @@ function AdminPanel({
       const message =
         error instanceof Error
           ? error.message
-          : "Terjadi kesalahan yang tidak diketahui.";
+          : "Terjadi kesalahan saat upload.";
 
       alert(`Upload gagal.\n\n${message}`);
     } finally {
@@ -376,6 +372,7 @@ function AdminPanel({
       }
     } catch (error) {
       console.error("Delete gagal:", error);
+
       alert(
         error instanceof Error
           ? error.message
@@ -496,35 +493,23 @@ function AdminPanel({
   );
 }
 
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+async function fileToBase64(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
 
-    reader.onload = () => {
-      const result = String(reader.result);
+  let binary = "";
+  const chunkSize = 8192;
 
-      const commaIndex = result.indexOf(",");
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(
+      i,
+      Math.min(i + chunkSize, bytes.length)
+    );
 
-      if (commaIndex === -1) {
-        reject(
-          new Error("Format gambar tidak valid.")
-        );
-        return;
-      }
+    binary += String.fromCharCode(...chunk);
+  }
 
-      resolve(
-        result.substring(commaIndex + 1)
-      );
-    };
-
-    reader.onerror = () => {
-      reject(
-        new Error("Gagal membaca gambar.")
-      );
-    };
-
-    reader.readAsDataURL(file);
-  });
+  return btoa(binary);
 }
 
 export default App;
