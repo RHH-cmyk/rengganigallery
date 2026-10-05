@@ -50,11 +50,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!selected) {
-      return;
-    }
-
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = selected ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -66,8 +62,7 @@ function App() {
       setLoading(true);
 
       const response = await fetch(`${API_URL}?action=posts`);
-      const text = await response.text();
-      const data = JSON.parse(text);
+      const data = await response.json();
 
       if (data.success) {
         setPosts(data.posts || []);
@@ -116,8 +111,7 @@ function App() {
         }),
       });
 
-      const text = await response.text();
-      const data = JSON.parse(text);
+      const data = await response.json();
 
       if (data.success) {
         localStorage.setItem(likedKey, "1");
@@ -177,10 +171,6 @@ function App() {
     countView(post.id);
   }
 
-  function closeViewer() {
-    setSelected(null);
-  }
-
   if (admin) {
     return (
       <AdminPanel
@@ -194,7 +184,9 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">Renggani Gallery</div>
+        <div className="brand">
+          Renggani
+        </div>
 
         <button
           className="admin-button"
@@ -229,7 +221,6 @@ function App() {
                   <button
                     className="image-button"
                     onClick={() => openPost(post)}
-                    aria-label="Buka foto"
                   >
                     <img
                       src={post.image_url}
@@ -270,14 +261,16 @@ function App() {
       </main>
 
       {selected && (
-        <ImageViewer
+        <PostModal
           post={selected}
           liked={
             localStorage.getItem(
               `gallery_liked_${selected.id}`
             ) === "1"
           }
-          onClose={closeViewer}
+          onClose={() =>
+            setSelected(null)
+          }
           onLike={() =>
             likePost(selected.id)
           }
@@ -287,19 +280,23 @@ function App() {
   );
 }
 
-type ImageViewerProps = {
+/* =====================================================
+   INSTAGRAM STYLE POST MODAL
+===================================================== */
+
+type PostModalProps = {
   post: Post;
   liked: boolean;
   onClose: () => void;
   onLike: () => void;
 };
 
-function ImageViewer({
+function PostModal({
   post,
   liked,
   onClose,
   onLike,
-}: ImageViewerProps) {
+}: PostModalProps) {
   const [scale, setScale] = useState(1);
 
   const [position, setPosition] =
@@ -311,21 +308,40 @@ function ImageViewer({
   const [loaded, setLoaded] =
     useState(false);
 
-  const gestureRef = useRef<{
-    mode: "none" | "pan" | "pinch";
-    startPoint: Point;
-    startPosition: Point;
-    startDistance: number;
-    startScale: number;
-  }>({
-    mode: "none",
-    startPoint: { x: 0, y: 0 },
-    startPosition: { x: 0, y: 0 },
-    startDistance: 0,
-    startScale: 1,
-  });
+  const lastTap =
+    useRef(0);
 
-  const lastTapRef = useRef(0);
+  const gesture =
+    useRef<{
+      mode:
+        | "none"
+        | "pan"
+        | "pinch";
+
+      startPoint: Point;
+
+      startPosition: Point;
+
+      startDistance: number;
+
+      startScale: number;
+    }>({
+      mode: "none",
+
+      startPoint: {
+        x: 0,
+        y: 0,
+      },
+
+      startPosition: {
+        x: 0,
+        y: 0,
+      },
+
+      startDistance: 0,
+
+      startScale: 1,
+    });
 
   function resetZoom() {
     setScale(1);
@@ -336,24 +352,22 @@ function ImageViewer({
     });
   }
 
-  function getDistance(
-    first: TouchPoint,
-    second: TouchPoint
+  function distance(
+    a: TouchPoint,
+    b: TouchPoint
   ) {
-    const dx =
-      second.clientX -
-      first.clientX;
+    const x =
+      b.clientX - a.clientX;
 
-    const dy =
-      second.clientY -
-      first.clientY;
+    const y =
+      b.clientY - a.clientY;
 
     return Math.sqrt(
-      dx * dx + dy * dy
+      x * x + y * y
     );
   }
 
-  function handleTouchStart(
+  function touchStart(
     event: TouchEvent<HTMLImageElement>
   ) {
     event.stopPropagation();
@@ -362,12 +376,7 @@ function ImageViewer({
       const first = event.touches[0];
       const second = event.touches[1];
 
-      const distance = getDistance(
-        first,
-        second
-      );
-
-      gestureRef.current = {
+      gesture.current = {
         mode: "pinch",
 
         startPoint: {
@@ -377,7 +386,10 @@ function ImageViewer({
 
         startPosition: position,
 
-        startDistance: distance,
+        startDistance: distance(
+          first,
+          second
+        ),
 
         startScale: scale,
       };
@@ -389,7 +401,7 @@ function ImageViewer({
       const now = Date.now();
 
       if (
-        now - lastTapRef.current <
+        now - lastTap.current <
         300
       ) {
         if (scale > 1) {
@@ -398,14 +410,13 @@ function ImageViewer({
           setScale(2.5);
         }
 
-        lastTapRef.current = 0;
-
+        lastTap.current = 0;
         return;
       }
 
-      lastTapRef.current = now;
+      lastTap.current = now;
 
-      gestureRef.current = {
+      gesture.current = {
         mode:
           scale > 1
             ? "pan"
@@ -425,16 +436,16 @@ function ImageViewer({
     }
   }
 
-  function handleTouchMove(
+  function touchMove(
     event: TouchEvent<HTMLImageElement>
   ) {
     event.stopPropagation();
 
-    const gesture =
-      gestureRef.current;
+    const current =
+      gesture.current;
 
     if (
-      gesture.mode === "pinch" &&
+      current.mode === "pinch" &&
       event.touches.length >= 2
     ) {
       event.preventDefault();
@@ -442,27 +453,22 @@ function ImageViewer({
       const first = event.touches[0];
       const second = event.touches[1];
 
-      const distance = getDistance(
-        first,
-        second
-      );
-
       const ratio =
-        distance /
-        gesture.startDistance;
+        distance(first, second) /
+        current.startDistance;
 
       const nextScale = Math.min(
         4,
         Math.max(
           1,
-          gesture.startScale *
+          current.startScale *
             ratio
         )
       );
 
       setScale(nextScale);
 
-      if (nextScale <= 1) {
+      if (nextScale === 1) {
         setPosition({
           x: 0,
           y: 0,
@@ -473,7 +479,7 @@ function ImageViewer({
     }
 
     if (
-      gesture.mode === "pan" &&
+      current.mode === "pan" &&
       event.touches.length === 1 &&
       scale > 1
     ) {
@@ -481,116 +487,96 @@ function ImageViewer({
 
       const dx =
         event.touches[0].clientX -
-        gesture.startPoint.x;
+        current.startPoint.x;
 
       const dy =
         event.touches[0].clientY -
-        gesture.startPoint.y;
+        current.startPoint.y;
 
       setPosition({
         x:
-          gesture.startPosition.x +
+          current.startPosition.x +
           dx,
 
         y:
-          gesture.startPosition.y +
+          current.startPosition.y +
           dy,
       });
     }
   }
 
-  function handleTouchEnd(
+  function touchEnd(
     event: TouchEvent<HTMLImageElement>
   ) {
     event.stopPropagation();
 
     if (event.touches.length === 0) {
-      gestureRef.current.mode =
+      gesture.current.mode =
         "none";
 
       if (scale <= 1.02) {
         resetZoom();
       }
     }
-
-    if (
-      event.touches.length === 1 &&
-      scale > 1
-    ) {
-      gestureRef.current.mode =
-        "pan";
-
-      gestureRef.current.startPoint = {
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY,
-      };
-
-      gestureRef.current.startPosition =
-        position;
-    }
   }
 
-  function handleWheel(
+  function wheel(
     event: WheelEvent<HTMLImageElement>
   ) {
     event.preventDefault();
-    event.stopPropagation();
 
-    const direction =
-      event.deltaY > 0
-        ? -0.2
-        : 0.2;
-
-    const nextScale = Math.min(
+    const next = Math.min(
       4,
       Math.max(
         1,
-        scale + direction
+        scale +
+          (event.deltaY > 0
+            ? -0.2
+            : 0.2)
       )
     );
 
-    setScale(nextScale);
+    setScale(next);
 
-    if (nextScale === 1) {
-      setPosition({
-        x: 0,
-        y: 0,
-      });
+    if (next === 1) {
+      resetZoom();
     }
   }
 
   return (
     <div
-      className="viewer"
+      className="modal-layer"
       onClick={onClose}
     >
-      <div className="viewer-backdrop" />
+      <div className="modal-backdrop" />
 
       <button
-        className="viewer-close"
+        className="modal-close"
         onClick={onClose}
         aria-label="Tutup"
       >
         ×
       </button>
 
-      <div
-        className="viewer-content"
+      <article
+        className="post-modal"
         onClick={(event) =>
           event.stopPropagation()
         }
       >
-        <div className="viewer-image-wrap">
+        {/* FOTO */}
+
+        <div className="post-photo">
           {!loaded && (
-            <div className="viewer-loading">
+            <div className="photo-loading">
               Memuat...
             </div>
           )}
 
           <img
-            className={`viewer-image ${
+            className={`modal-image ${
               loaded
-                ? "viewer-image-loaded"
+                ? "modal-image-ready"
                 : ""
             }`}
             src={post.image_url}
@@ -603,45 +589,141 @@ function ImageViewer({
               setLoaded(true)
             }
             onTouchStart={
-              handleTouchStart
+              touchStart
             }
             onTouchMove={
-              handleTouchMove
+              touchMove
             }
             onTouchEnd={
-              handleTouchEnd
+              touchEnd
             }
-            onWheel={handleWheel}
+            onWheel={wheel}
             style={{
               transform:
                 `translate3d(${position.x}px, ${position.y}px, 0) ` +
                 `scale(${scale})`,
             }}
           />
+
+          {scale > 1 && (
+            <button
+              className="zoom-reset"
+              onClick={resetZoom}
+            >
+              Reset
+            </button>
+          )}
         </div>
 
-        <div className="viewer-bottom">
-          <div className="viewer-caption">
-            {post.caption}
+        {/* POST INFO */}
+
+        <aside className="post-info">
+          <div className="post-header">
+            <div className="post-avatar">
+              R
+            </div>
+
+            <div className="post-user">
+              <strong>
+                Renggani
+              </strong>
+
+              <span>
+                Gallery
+              </span>
+            </div>
+
+            <button
+              className="post-more"
+              aria-label="Menu"
+            >
+              •••
+            </button>
           </div>
 
-          <button
-            className={`viewer-like ${
-              liked ? "liked" : ""
-            }`}
-            onClick={onLike}
-          >
-            <span>
-              {liked ? "♥" : "♡"}
-            </span>
+          <div className="post-caption">
+            {post.caption && (
+              <>
+                <strong>
+                  Renggani
+                </strong>{" "}
+                {post.caption}
+              </>
+            )}
+          </div>
 
-            {post.likes}
-          </button>
-        </div>
-      </div>
+          <div className="post-actions">
+            <button
+              className={`modal-like ${
+                liked ? "liked" : ""
+              }`}
+              onClick={onLike}
+            >
+              {liked ? "♥" : "♡"}
+            </button>
+
+            <button
+              className="modal-action"
+              onClick={() => {}}
+            >
+              ♧
+            </button>
+
+            <button
+              className="modal-action"
+              onClick={() => {}}
+            >
+              ↗
+            </button>
+          </div>
+
+          <div className="post-likes">
+            {post.likes}{" "}
+            {post.likes === 1
+              ? "like"
+              : "likes"}
+          </div>
+
+          <div className="post-date">
+            {post.created_at
+              ? formatDate(
+                  post.created_at
+                )
+              : "Renggani Gallery"}
+          </div>
+        </aside>
+      </article>
     </div>
   );
 }
+
+function formatDate(
+  value: string
+) {
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "Renggani Gallery";
+  }
+
+  return date.toLocaleDateString(
+    "id-ID",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  );
+}
+
+/* =====================================================
+   ADMIN
+===================================================== */
 
 type AdminPanelProps = {
   posts: Post[];
@@ -696,11 +778,10 @@ function AdminPanel({
       const result =
         String(reader.result);
 
-      const commaIndex =
+      const comma =
         result.indexOf(",");
 
-      if (commaIndex === -1) {
-        setImageBase64("");
+      if (comma === -1) {
         setReading(false);
 
         alert(
@@ -712,7 +793,7 @@ function AdminPanel({
 
       setImageBase64(
         result.substring(
-          commaIndex + 1
+          comma + 1
         )
       );
 
@@ -720,11 +801,10 @@ function AdminPanel({
     };
 
     reader.onerror = () => {
-      setImageBase64("");
       setReading(false);
 
       alert(
-        "Gambar tidak bisa dibaca oleh browser."
+        "Gambar tidak bisa dibaca."
       );
     };
 
@@ -736,7 +816,6 @@ function AdminPanel({
       alert(
         "Tunggu gambar selesai dibaca."
       );
-
       return;
     }
 
@@ -744,7 +823,6 @@ function AdminPanel({
       alert(
         "Pilih gambar terlebih dahulu."
       );
-
       return;
     }
 
@@ -770,23 +848,13 @@ function AdminPanel({
           }),
         });
 
-      const text =
-        await response.text();
-
-      let data;
-
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error(
-          "Server mengirim response yang tidak valid."
-        );
-      }
+      const data =
+        await response.json();
 
       if (!data.success) {
         throw new Error(
           data.message ||
-            "Server menolak upload."
+            "Upload gagal."
         );
       }
 
@@ -810,11 +878,6 @@ function AdminPanel({
 
       await onRefresh();
     } catch (error) {
-      console.error(
-        "UPLOAD ERROR:",
-        error
-      );
-
       alert(
         error instanceof Error
           ? `Upload gagal.\n\n${error.message}`
@@ -828,12 +891,11 @@ function AdminPanel({
   async function deletePost(
     id: string
   ) {
-    const confirmed =
-      window.confirm(
+    if (
+      !window.confirm(
         "Hapus gambar ini?"
-      );
-
-    if (!confirmed) {
+      )
+    ) {
       return;
     }
 
@@ -854,11 +916,8 @@ function AdminPanel({
           }),
         });
 
-      const text =
-        await response.text();
-
       const data =
-        JSON.parse(text);
+        await response.json();
 
       if (data.success) {
         await onRefresh();
@@ -868,17 +927,8 @@ function AdminPanel({
             "Gagal menghapus."
         );
       }
-    } catch (error) {
-      console.error(
-        "Delete gagal:",
-        error
-      );
-
-      alert(
-        error instanceof Error
-          ? error.message
-          : "Gagal menghapus."
-      );
+    } catch {
+      alert("Gagal menghapus.");
     }
   }
 
@@ -886,7 +936,9 @@ function AdminPanel({
     <div className="admin-page">
       <header className="admin-header">
         <div>
-          <h1>Gallery Admin</h1>
+          <h1>
+            Gallery Admin
+          </h1>
 
           <p>
             Kelola posting gallery
@@ -913,9 +965,8 @@ function AdminPanel({
           >
             {reading
               ? "Membaca gambar..."
-              : imageName
-                ? imageName
-                : "Pilih gambar dari HP"}
+              : imageName ||
+                "Pilih gambar dari HP"}
           </label>
 
           <input
