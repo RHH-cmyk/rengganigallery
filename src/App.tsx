@@ -505,7 +505,7 @@ function formatDate(value: string) {
 }
 
 /* =====================================================
-   ADMIN PANEL WITH PROGRESS TRACKING & GLASS UI
+   ADMIN PANEL WITH FETCH & SIMULATED PROGRESS (IOS SAFARI STYLE)
 ===================================================== */
 
 type AdminPanelProps = {
@@ -521,6 +521,8 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
   const [caption, setCaption] = useState("");
   const [reading, setReading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  
+  // Progress state
   const [uploadProgress, setUploadProgress] = useState(0);
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
@@ -552,39 +554,6 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
     reader.readAsDataURL(file);
   }
 
-  // Fungsi khusus melacak progres upload dengan XMLHttpRequest
-  const uploadWithProgress = (payload: string) => {
-    return new Promise<any>((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", API_URL, true);
-      xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
-
-      // Melacak progres payload
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(percent);
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            resolve(response);
-          } catch (e) {
-            resolve({ success: false, message: "Invalid response from server" });
-          }
-        } else {
-          reject(new Error("Gagal menyambung ke server. HTTP " + xhr.status));
-        }
-      };
-
-      xhr.onerror = () => reject(new Error("Terjadi kesalahan jaringan (Network Error)"));
-      xhr.send(payload);
-    });
-  };
-
   async function upload() {
     if (reading) {
       alert("Tunggu gambar selesai dibaca.");
@@ -595,46 +564,73 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
       return;
     }
 
-    try {
-      setUploading(true);
-      setUploadProgress(0);
+    setUploading(true);
+    setUploadProgress(0);
 
-      const payload = JSON.stringify({
-        action: "upload",
-        adminKey: ADMIN_KEY,
-        imageBase64,
-        mimeType: imageMimeType,
-        caption,
+    // Membuat Progress bayangan (Simulasi) yang bergerak mulus max ke 90%
+    const progressInterval = setInterval(() => {
+      setUploadProgress((oldProgress) => {
+        if (oldProgress >= 90) return 90; // Mentok di 90% nunggu server balas
+        return oldProgress + Math.floor(Math.random() * 8) + 2; // Nambah random 2-9%
+      });
+    }, 400);
+
+    try {
+      // Kembali menggunakan fetch murni yang kebal CORS Google Apps Script
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+        body: JSON.stringify({
+          action: "upload",
+          adminKey: ADMIN_KEY,
+          imageBase64,
+          mimeType: imageMimeType,
+          caption,
+        }),
       });
 
-      const data = await uploadWithProgress(payload);
+      const data = await response.json();
+      
+      clearInterval(progressInterval); // Hentikan simulasi progress
 
       if (!data.success) {
         throw new Error(data.message || "Upload gagal.");
       }
 
-      alert("Gambar berhasil diupload.");
-      setImageBase64("");
-      setImageName("");
-      setImageMimeType("");
-      setCaption("");
+      // Mentokkan bar ke 100% jika sukses
+      setUploadProgress(100);
 
-      const input = document.getElementById(
-        "image-upload"
-      ) as HTMLInputElement | null;
-      if (input) {
-        input.value = "";
-      }
-      await onRefresh();
+      // Tunggu setengah detik biar animasinya 100% terlihat mulus oleh mata
+      setTimeout(async () => {
+        alert("Gambar berhasil diupload.");
+        setImageBase64("");
+        setImageName("");
+        setImageMimeType("");
+        setCaption("");
+        
+        const input = document.getElementById(
+          "image-upload"
+        ) as HTMLInputElement | null;
+        if (input) {
+          input.value = "";
+        }
+        
+        setUploading(false);
+        setUploadProgress(0);
+        await onRefresh();
+      }, 500);
+
     } catch (error) {
+      clearInterval(progressInterval); // Hentikan simulasi
+      setUploading(false);
+      setUploadProgress(0);
       alert(
         error instanceof Error
           ? `Upload gagal.\n\n${error.message}`
           : "Upload gagal."
       );
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
     }
   }
 
