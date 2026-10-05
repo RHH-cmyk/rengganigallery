@@ -5,7 +5,7 @@
 html {
   margin: 0;
   padding: 0;
-  background: #ffffff;
+  background: #fafafa;
 }
 
 body {
@@ -17,8 +17,9 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  background: #ffffff;
-  color: #111111;
+  background: #fafafa;
+  color: #111;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -31,77 +32,97 @@ button {
   cursor: pointer;
 }
 
+/* =====================================================
+   APP
+===================================================== */
+
 .app {
   min-height: 100vh;
-  background: #ffffff;
+  background: #fafafa;
 }
 
-/* =========================
+/* =====================================================
    HEADER
-========================= */
+===================================================== */
 
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 40;
 
-  height: 64px;
+  height: 66px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 24px;
+  padding: 0 28px;
 
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(250, 250, 250, 0.88);
 
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .brand {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-size: 21px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+  color: #111;
 }
 
 .admin-button {
   border: 0;
   background: transparent;
 
-  color: #555555;
+  padding: 9px 12px;
+
+  color: #777;
 
   font-size: 13px;
+  font-weight: 500;
 
-  padding: 8px 10px;
+  border-radius: 10px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
-/* =========================
-   MASONRY GALLERY
-========================= */
+.admin-button:hover {
+  background: #eeeeee;
+  color: #111;
+}
+
+/* =====================================================
+   GALLERY
+===================================================== */
 
 .gallery-page {
   width: 100%;
-  max-width: 1800px;
+  max-width: 1700px;
 
   margin: 0 auto;
 
-  padding: 18px;
+  padding:
+    22px
+    22px
+    60px;
 }
 
 .gallery-masonry {
   columns: 5 220px;
-  column-gap: 12px;
+  column-gap: 13px;
 }
 
 .gallery-card {
-  width: 100%;
-
   display: inline-block;
 
-  margin: 0 0 12px;
+  width: 100%;
+
+  margin: 0 0 13px;
 
   vertical-align: top;
 
@@ -109,6 +130,8 @@ button {
 }
 
 .image-button {
+  position: relative;
+
   display: block;
 
   width: 100%;
@@ -117,13 +140,33 @@ button {
 
   border: 0;
 
-  border-radius: 12px;
+  border-radius: 14px;
 
   overflow: hidden;
 
-  background: #f2f2f2;
+  background: #eeeeee;
 
   line-height: 0;
+}
+
+.image-button::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0),
+      rgba(0, 0, 0, 0)
+    );
+
+  pointer-events: none;
+
+  transition:
+    background 0.3s ease;
 }
 
 .image-button img {
@@ -132,16 +175,35 @@ button {
   width: 100%;
   height: auto;
 
-  border-radius: 12px;
+  border-radius: 14px;
 
   transition:
-    transform 0.25s ease,
-    filter 0.25s ease;
+    transform 0.45s
+      cubic-bezier(
+        0.2,
+        0.7,
+        0.2,
+        1
+      ),
+    filter 0.3s ease;
 }
 
 .image-button:hover img {
-  transform: scale(1.012);
+  transform: scale(1.025);
 }
+
+.image-button:hover::after {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0),
+      rgba(0, 0, 0, 0.04)
+    );
+}
+
+/* =====================================================
+   CARD INFO
+===================================================== */
 
 .card-bottom {
   display: flex;
@@ -150,7 +212,12 @@ button {
 
   gap: 10px;
 
-  padding: 7px 3px 2px;
+  min-height: 31px;
+
+  padding:
+    6px
+    3px
+    1px;
 }
 
 .caption {
@@ -160,13 +227,18 @@ button {
 
   margin: 0;
 
-  color: #222222;
+  color: #333;
 
-  font-size: 13px;
+  font-size: 12px;
 
   line-height: 1.4;
 
-  overflow-wrap: anywhere;
+  overflow: hidden;
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .like-button {
@@ -178,63 +250,88 @@ button {
 
   gap: 4px;
 
-  padding: 3px 2px;
+  padding: 4px 2px;
 
   border: 0;
 
   background: transparent;
 
-  color: #555555;
+  color: #777;
 
-  font-size: 13px;
+  font-size: 12px;
+
+  transition:
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.like-button:active {
+  transform: scale(0.88);
 }
 
 .like-button span {
-  font-size: 21px;
+  font-size: 20px;
+
   line-height: 1;
+
+  transition:
+    transform 0.2s ease;
 }
 
 .like-button.liked {
-  color: #e53935;
+  color: #ff3040;
 }
 
+.like-button.liked span {
+  transform: scale(1.05);
+}
+
+/* =====================================================
+   EMPTY / LOADING
+===================================================== */
+
 .state {
-  min-height: 300px;
+  min-height: 360px;
 
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
-  color: #777777;
+  color: #999;
 
   font-size: 14px;
 }
 
-/* =========================
-   INSTAGRAM STYLE MODAL
-========================= */
+/* =====================================================
+   INSTAGRAM STYLE LIGHTBOX
+===================================================== */
 
 .viewer {
   position: fixed;
 
   inset: 0;
 
-  z-index: 100;
+  z-index: 200;
 
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
-  padding: 24px;
+  padding: 30px;
 
   overflow: hidden;
 
-  animation: viewerFadeIn 0.18s ease;
+  animation:
+    viewerAppear
+    0.22s
+    ease-out;
 }
 
-@keyframes viewerFadeIn {
+@keyframes viewerAppear {
   from {
     opacity: 0;
   }
@@ -244,77 +341,96 @@ button {
   }
 }
 
-/* BLURRED BACKGROUND */
+/* blurred page behind modal */
 
 .viewer-backdrop {
   position: absolute;
 
-  inset: -40px;
+  inset: -60px;
 
   background:
-    rgba(0, 0, 0, 0.72);
+    rgba(10, 10, 10, 0.76);
 
-  backdrop-filter: blur(28px);
+  backdrop-filter:
+    blur(32px)
+    saturate(0.75);
 
-  -webkit-backdrop-filter: blur(28px);
+  -webkit-backdrop-filter:
+    blur(32px)
+    saturate(0.75);
 }
 
-/* MODAL */
+/* =====================================================
+   MODAL
+===================================================== */
 
 .viewer-content {
   position: relative;
 
-  z-index: 2;
+  z-index: 5;
 
   width: min(
-    1080px,
+    1120px,
     94vw
   );
 
   height: min(
-    90vh,
-    900px
+    820px,
+    88vh
   );
 
-  display: flex;
+  display: grid;
 
-  flex-direction: column;
+  grid-template-columns:
+    minmax(0, 1fr)
+    310px;
 
   overflow: hidden;
 
-  background: #050505;
+  background: #fff;
 
-  border-radius: 14px;
+  border-radius: 18px;
 
   box-shadow:
-    0 25px 80px
-      rgba(0, 0, 0, 0.55);
+    0 30px 100px
+      rgba(0, 0, 0, 0.48);
 
-  animation: modalIn 0.2s ease;
+  animation:
+    modalAppear
+    0.25s
+    cubic-bezier(
+      0.2,
+      0.8,
+      0.2,
+      1
+    );
 }
 
-@keyframes modalIn {
+@keyframes modalAppear {
   from {
     opacity: 0;
-    transform: scale(0.97);
+    transform:
+      translateY(12px)
+      scale(0.975);
   }
 
   to {
     opacity: 1;
-    transform: scale(1);
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
 
-/* FOTO AREA */
+/* =====================================================
+   MODAL IMAGE
+===================================================== */
 
 .viewer-image-wrap {
   position: relative;
 
-  flex: 1;
-
+  min-width: 0;
   min-height: 0;
-
-  width: 100%;
 
   display: flex;
 
@@ -323,12 +439,34 @@ button {
 
   overflow: hidden;
 
-  background: #050505;
+  background:
+    #111;
 
   touch-action: none;
 }
 
+.viewer-image-wrap::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255,255,255,0.025),
+      rgba(0,0,0,0.2)
+    );
+
+  pointer-events: none;
+}
+
 .viewer-image {
+  position: relative;
+
+  z-index: 2;
+
   display: block;
 
   max-width: 100%;
@@ -340,6 +478,7 @@ button {
   object-fit: contain;
 
   user-select: none;
+
   -webkit-user-select: none;
 
   -webkit-touch-callout: none;
@@ -349,7 +488,7 @@ button {
   opacity: 0;
 
   transition:
-    opacity 0.2s ease;
+    opacity 0.22s ease;
 }
 
 .viewer-image-loaded {
@@ -363,22 +502,129 @@ button {
 .viewer-loading {
   position: absolute;
 
-  z-index: 2;
+  z-index: 1;
 
-  color: #ffffff;
+  color: rgba(
+    255,
+    255,
+    255,
+    0.7
+  );
 
-  font-size: 14px;
+  font-size: 13px;
 }
 
-/* CLOSE */
+/* =====================================================
+   MODAL RIGHT PANEL
+===================================================== */
+
+.viewer-bottom {
+  position: relative;
+
+  z-index: 10;
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: flex-end;
+
+  padding: 22px;
+
+  background: #fff;
+
+  color: #111;
+
+  border-left:
+    1px solid
+    rgba(0, 0, 0, 0.07);
+}
+
+.viewer-caption {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  padding-top: 6px;
+
+  color: #222;
+
+  font-size: 14px;
+
+  line-height: 1.65;
+
+  overflow-wrap: anywhere;
+
+  scrollbar-width: thin;
+}
+
+.viewer-like {
+  flex-shrink: 0;
+
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 18px;
+
+  padding:
+    13px
+    0;
+
+  border: 0;
+
+  border-top:
+    1px solid
+    #eeeeee;
+
+  background: transparent;
+
+  color: #333;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  text-align: left;
+
+  transition:
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.viewer-like:active {
+  transform: scale(0.98);
+}
+
+.viewer-like span {
+  font-size: 25px;
+
+  line-height: 1;
+}
+
+.viewer-like.liked {
+  color: #ff3040;
+}
+
+/* =====================================================
+   CLOSE
+===================================================== */
 
 .viewer-close {
   position: absolute;
 
-  top: 12px;
-  right: 12px;
+  top: -52px;
+  right: 0;
 
-  z-index: 10;
+  z-index: 20;
 
   width: 42px;
   height: 42px;
@@ -393,101 +639,32 @@ button {
   border-radius: 50%;
 
   background:
-    rgba(0, 0, 0, 0.55);
+    rgba(255,255,255,0.15);
 
-  color: #ffffff;
+  color: #fff;
 
-  font-size: 29px;
+  font-size: 27px;
 
   line-height: 1;
 
-  box-shadow:
-    0 3px 15px
-      rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 .viewer-close:hover {
   background:
-    rgba(255, 255, 255, 0.18);
+    rgba(255,255,255,0.25);
+
+  transform: rotate(4deg);
 }
 
-/* BOTTOM INSTAGRAM BAR */
-
-.viewer-bottom {
-  position: relative;
-
-  z-index: 5;
-
-  flex-shrink: 0;
-
-  min-height: 62px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 14px;
-
-  padding: 10px 16px;
-
-  background: #050505;
-
-  color: #ffffff;
-
-  border-top: 1px solid
-    rgba(255, 255, 255, 0.08);
-}
-
-.viewer-caption {
-  flex: 1;
-
-  min-width: 0;
-
-  color: #ffffff;
-
-  font-size: 14px;
-
-  line-height: 1.45;
-
-  overflow-wrap: anywhere;
-}
-
-.viewer-like {
-  flex-shrink: 0;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 6px;
-
-  padding: 6px 3px;
-
-  border: 0;
-
-  background: transparent;
-
-  color: #ffffff;
-
-  font-size: 14px;
-}
-
-.viewer-like span {
-  font-size: 25px;
-
-  line-height: 1;
-}
-
-.viewer-like.liked {
-  color: #ff3040;
-}
-
-/* =========================
+/* =====================================================
    ADMIN
-========================= */
+===================================================== */
 
 .admin-page {
   min-height: 100vh;
@@ -505,13 +682,27 @@ button {
   display: flex;
 
   align-items: center;
+
   justify-content: space-between;
 
   padding: 18px 24px;
 
-  background: #ffffff;
+  background: rgba(
+    255,
+    255,
+    255,
+    0.94
+  );
 
-  border-bottom: 1px solid #eeeeee;
+  border-bottom:
+    1px solid
+    #eeeeee;
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
 }
 
 .admin-header h1 {
@@ -523,19 +714,23 @@ button {
 .admin-header p {
   margin: 4px 0 0;
 
-  color: #777777;
+  color: #777;
 
   font-size: 13px;
 }
 
 .logout-button {
-  border: 1px solid #dddddd;
+  border:
+    1px solid
+    #dddddd;
 
-  border-radius: 8px;
+  border-radius: 9px;
 
-  padding: 9px 13px;
+  padding:
+    9px
+    13px;
 
-  background: #ffffff;
+  background: #fff;
 }
 
 .admin-content {
@@ -552,11 +747,17 @@ button {
 .upload-box {
   padding: 20px;
 
-  background: #ffffff;
+  background: #fff;
 
-  border: 1px solid #e8e8e8;
+  border:
+    1px solid
+    #e8e8e8;
 
-  border-radius: 14px;
+  border-radius: 15px;
+
+  box-shadow:
+    0 5px 25px
+      rgba(0,0,0,0.035);
 }
 
 .upload-box h2,
@@ -570,6 +771,7 @@ button {
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
   min-height: 120px;
@@ -578,13 +780,15 @@ button {
 
   padding: 20px;
 
-  border: 2px dashed #d7d7d7;
+  border:
+    2px dashed
+    #d7d7d7;
 
   border-radius: 12px;
 
   background: #fafafa;
 
-  color: #666666;
+  color: #666;
 
   text-align: center;
 }
@@ -604,7 +808,9 @@ button {
 
   resize: vertical;
 
-  border: 1px solid #dddddd;
+  border:
+    1px solid
+    #dddddd;
 
   border-radius: 10px;
 
@@ -612,7 +818,7 @@ button {
 }
 
 .upload-box textarea:focus {
-  border-color: #999999;
+  border-color: #999;
 }
 
 .upload-button {
@@ -626,9 +832,9 @@ button {
 
   border-radius: 10px;
 
-  background: #111111;
+  background: #111;
 
-  color: #ffffff;
+  color: #fff;
 
   font-weight: 600;
 }
@@ -647,19 +853,24 @@ button {
   display: flex;
 
   align-items: center;
+
   justify-content: space-between;
 
   margin-bottom: 12px;
 }
 
 .admin-posts-title button {
-  border: 1px solid #dddddd;
+  border:
+    1px solid
+    #dddddd;
 
   border-radius: 8px;
 
-  padding: 7px 12px;
+  padding:
+    7px
+    12px;
 
-  background: #ffffff;
+  background: #fff;
 }
 
 .admin-list {
@@ -679,9 +890,11 @@ button {
 
   padding: 10px;
 
-  background: #ffffff;
+  background: #fff;
 
-  border: 1px solid #e8e8e8;
+  border:
+    1px solid
+    #e8e8e8;
 
   border-radius: 12px;
 }
@@ -704,7 +917,8 @@ button {
 }
 
 .admin-item-info p {
-  margin: 0 0 5px;
+  margin:
+    0 0 5px;
 
   font-size: 14px;
 
@@ -712,7 +926,7 @@ button {
 }
 
 .admin-item-info small {
-  color: #777777;
+  color: #777;
 }
 
 .delete-button {
@@ -722,32 +936,42 @@ button {
 
   border-radius: 8px;
 
-  padding: 8px 11px;
+  padding:
+    8px
+    11px;
 
   background: #eeeeee;
 
   color: #d22;
 }
 
-/* =========================
+/* =====================================================
    TABLET
-========================= */
+===================================================== */
 
 @media (max-width: 1100px) {
   .gallery-masonry {
     columns: 4 200px;
   }
+
+  .viewer-content {
+    grid-template-columns:
+      minmax(0, 1fr)
+      280px;
+  }
 }
 
-/* =========================
+/* =====================================================
    MOBILE
-========================= */
+===================================================== */
 
 @media (max-width: 700px) {
   .topbar {
     height: 58px;
 
-    padding: 0 14px;
+    padding:
+      0
+      14px;
   }
 
   .brand {
@@ -755,7 +979,10 @@ button {
   }
 
   .gallery-page {
-    padding: 7px;
+    padding:
+      9px
+      7px
+      40px;
   }
 
   .gallery-masonry {
@@ -770,13 +997,18 @@ button {
 
   .image-button,
   .image-button img {
-    border-radius: 8px;
+    border-radius: 9px;
   }
 
   .card-bottom {
-    gap: 5px;
+    min-height: 28px;
 
-    padding: 5px 2px 1px;
+    gap: 4px;
+
+    padding:
+      4px
+      2px
+      0;
   }
 
   .caption {
@@ -785,13 +1017,19 @@ button {
 
   .like-button {
     font-size: 11px;
+
+    padding:
+      3px
+      1px;
   }
 
   .like-button span {
     font-size: 18px;
   }
 
-  /* MOBILE MODAL */
+  /* =========================
+     MOBILE MODAL
+  ========================= */
 
   .viewer {
     padding: 10px;
@@ -799,17 +1037,31 @@ button {
 
   .viewer-content {
     width: 100%;
-    height: calc(100vh - 20px);
+
+    height:
+      calc(
+        100vh - 20px
+      );
 
     max-height: none;
 
-    border-radius: 14px;
+    display: flex;
+
+    flex-direction: column;
+
+    border-radius: 16px;
+
+    box-shadow:
+      0 25px 70px
+        rgba(0,0,0,0.5);
   }
 
   .viewer-image-wrap {
     flex: 1;
 
     min-height: 0;
+
+    width: 100%;
   }
 
   .viewer-image {
@@ -818,34 +1070,72 @@ button {
   }
 
   .viewer-bottom {
-    min-height: 58px;
+    flex-shrink: 0;
+
+    min-height: 67px;
 
     padding:
-      9px 13px
-      calc(9px + env(safe-area-inset-bottom));
+      11px
+      14px
+      calc(
+        11px +
+        env(safe-area-inset-bottom)
+      );
+
+    border-left: 0;
+
+    border-top:
+      1px solid
+      rgba(0,0,0,0.06);
   }
 
   .viewer-caption {
+    flex: 0 1 auto;
+
+    max-height: 75px;
+
+    padding: 0;
+
     font-size: 13px;
+
+    line-height: 1.45;
   }
 
   .viewer-like {
+    width: auto;
+
+    margin-top: 8px;
+
+    padding:
+      8px
+      0
+      0;
+
+    border-top: 0;
+
     font-size: 13px;
   }
 
   .viewer-like span {
-    font-size: 24px;
+    font-size: 23px;
   }
 
   .viewer-close {
-    top: 10px;
-    right: 10px;
+    position: absolute;
+
+    top: 9px;
+    right: 9px;
 
     width: 40px;
     height: 40px;
 
-    font-size: 27px;
+    font-size: 26px;
+
+    background:
+      rgba(0,0,0,0.48);
   }
+
+  /* ADMIN */
 
   .admin-header {
     padding: 15px;
@@ -869,8 +1159,37 @@ button {
   }
 
   .delete-button {
-    padding: 7px 9px;
+    padding:
+      7px
+      9px;
 
     font-size: 12px;
+  }
+}
+
+/* =====================================================
+   VERY SMALL PHONES
+===================================================== */
+
+@media (max-width: 380px) {
+  .gallery-masonry {
+    column-gap: 5px;
+  }
+
+  .gallery-card {
+    margin-bottom: 6px;
+  }
+
+  .viewer {
+    padding: 7px;
+  }
+
+  .viewer-content {
+    height:
+      calc(
+        100vh - 14px
+      );
+
+    border-radius: 14px;
   }
 }
