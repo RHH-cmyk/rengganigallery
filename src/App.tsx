@@ -26,6 +26,11 @@ type Point = {
   y: number;
 };
 
+type TouchPoint = {
+  clientX: number;
+  clientY: number;
+};
+
 function App() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -282,7 +287,6 @@ function App() {
   );
 }
 
-
 type ImageViewerProps = {
   post: Post;
   liked: boolean;
@@ -297,6 +301,7 @@ function ImageViewer({
   onLike,
 }: ImageViewerProps) {
   const [scale, setScale] = useState(1);
+
   const [position, setPosition] =
     useState<Point>({
       x: 0,
@@ -305,9 +310,6 @@ function ImageViewer({
 
   const [loaded, setLoaded] =
     useState(false);
-
-  const imageRef =
-    useRef<HTMLImageElement | null>(null);
 
   const gestureRef = useRef<{
     mode: "none" | "pan" | "pinch";
@@ -323,11 +325,11 @@ function ImageViewer({
     startScale: 1,
   });
 
-  const lastTapRef =
-    useRef(0);
+  const lastTapRef = useRef(0);
 
   function resetZoom() {
     setScale(1);
+
     setPosition({
       x: 0,
       y: 0,
@@ -335,8 +337,8 @@ function ImageViewer({
   }
 
   function getDistance(
-    first: Touch,
-    second: Touch
+    first: TouchPoint,
+    second: TouchPoint
   ) {
     const dx =
       second.clientX -
@@ -357,19 +359,26 @@ function ImageViewer({
     event.stopPropagation();
 
     if (event.touches.length >= 2) {
+      const first = event.touches[0];
+      const second = event.touches[1];
+
       const distance = getDistance(
-        event.touches[0],
-        event.touches[1]
+        first,
+        second
       );
 
       gestureRef.current = {
         mode: "pinch",
+
         startPoint: {
           x: 0,
           y: 0,
         },
+
         startPosition: position,
+
         startDistance: distance,
+
         startScale: scale,
       };
 
@@ -390,6 +399,7 @@ function ImageViewer({
         }
 
         lastTapRef.current = 0;
+
         return;
       }
 
@@ -400,12 +410,16 @@ function ImageViewer({
           scale > 1
             ? "pan"
             : "none",
+
         startPoint: {
           x: event.touches[0].clientX,
           y: event.touches[0].clientY,
         },
+
         startPosition: position,
+
         startDistance: 0,
+
         startScale: scale,
       };
     }
@@ -425,9 +439,12 @@ function ImageViewer({
     ) {
       event.preventDefault();
 
+      const first = event.touches[0];
+      const second = event.touches[1];
+
       const distance = getDistance(
-        event.touches[0],
-        event.touches[1]
+        first,
+        second
       );
 
       const ratio =
@@ -474,6 +491,7 @@ function ImageViewer({
         x:
           gesture.startPosition.x +
           dx,
+
         y:
           gesture.startPosition.y +
           dy,
@@ -570,7 +588,6 @@ function ImageViewer({
           )}
 
           <img
-            ref={imageRef}
             className={`viewer-image ${
               loaded
                 ? "viewer-image-loaded"
@@ -617,6 +634,7 @@ function ImageViewer({
             <span>
               {liked ? "♥" : "♡"}
             </span>
+
             {post.likes}
           </button>
         </div>
@@ -624,7 +642,6 @@ function ImageViewer({
     </div>
   );
 }
-
 
 type AdminPanelProps = {
   posts: Post[];
@@ -737,10 +754,12 @@ function AdminPanel({
       const response =
         await fetch(API_URL, {
           method: "POST",
+
           headers: {
             "Content-Type":
               "text/plain;charset=utf-8",
           },
+
           body: JSON.stringify({
             action: "upload",
             adminKey: ADMIN_KEY,
@@ -790,7 +809,6 @@ function AdminPanel({
       }
 
       await onRefresh();
-
     } catch (error) {
       console.error(
         "UPLOAD ERROR:",
@@ -802,7 +820,6 @@ function AdminPanel({
           ? `Upload gagal.\n\n${error.message}`
           : "Upload gagal."
       );
-
     } finally {
       setUploading(false);
     }
@@ -824,10 +841,12 @@ function AdminPanel({
       const response =
         await fetch(API_URL, {
           method: "POST",
+
           headers: {
             "Content-Type":
               "text/plain;charset=utf-8",
           },
+
           body: JSON.stringify({
             action: "delete",
             adminKey: ADMIN_KEY,
@@ -849,7 +868,6 @@ function AdminPanel({
             "Gagal menghapus."
         );
       }
-
     } catch (error) {
       console.error(
         "Delete gagal:",
@@ -869,6 +887,7 @@ function AdminPanel({
       <header className="admin-header">
         <div>
           <h1>Gallery Admin</h1>
+
           <p>
             Kelola posting gallery
           </p>
