@@ -36,7 +36,9 @@ button {
   background: #ffffff;
 }
 
-/* HEADER */
+/* =========================
+   HEADER
+========================= */
 
 .topbar {
   position: sticky;
@@ -76,11 +78,12 @@ button {
   padding: 8px 10px;
 }
 
-/* GALLERY */
+/* =========================
+   MASONRY GALLERY
+========================= */
 
 .gallery-page {
   width: 100%;
-
   max-width: 1800px;
 
   margin: 0 auto;
@@ -90,7 +93,6 @@ button {
 
 .gallery-masonry {
   columns: 5 220px;
-
   column-gap: 12px;
 }
 
@@ -128,7 +130,6 @@ button {
   display: block;
 
   width: 100%;
-
   height: auto;
 
   border-radius: 12px;
@@ -190,7 +191,6 @@ button {
 
 .like-button span {
   font-size: 21px;
-
   line-height: 1;
 }
 
@@ -204,7 +204,6 @@ button {
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   color: #777777;
@@ -212,7 +211,9 @@ button {
   font-size: 14px;
 }
 
-/* VIEWER */
+/* =========================
+   INSTAGRAM STYLE MODAL
+========================= */
 
 .viewer {
   position: fixed;
@@ -224,26 +225,41 @@ button {
   display: flex;
 
   align-items: center;
-
   justify-content: center;
+
+  padding: 24px;
 
   overflow: hidden;
 
-  padding: 20px;
+  animation: viewerFadeIn 0.18s ease;
 }
+
+@keyframes viewerFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* BLURRED BACKGROUND */
 
 .viewer-backdrop {
   position: absolute;
 
-  inset: -30px;
+  inset: -40px;
 
   background:
-    rgba(0, 0, 0, 0.78);
+    rgba(0, 0, 0, 0.72);
 
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(28px);
 
-  -webkit-backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(28px);
 }
+
+/* MODAL */
 
 .viewer-content {
   position: relative;
@@ -251,37 +267,63 @@ button {
   z-index: 2;
 
   width: min(
-    1200px,
-    100%
+    1080px,
+    94vw
   );
 
-  height: 100%;
+  height: min(
+    90vh,
+    900px
+  );
 
   display: flex;
 
   flex-direction: column;
 
-  align-items: center;
+  overflow: hidden;
 
-  justify-content: center;
+  background: #050505;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 25px 80px
+      rgba(0, 0, 0, 0.55);
+
+  animation: modalIn 0.2s ease;
 }
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* FOTO AREA */
 
 .viewer-image-wrap {
   position: relative;
 
-  width: 100%;
+  flex: 1;
 
-  height: calc(
-    100vh - 110px
-  );
+  min-height: 0;
+
+  width: 100%;
 
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   overflow: hidden;
+
+  background: #050505;
 
   touch-action: none;
 }
@@ -290,17 +332,14 @@ button {
   display: block;
 
   max-width: 100%;
-
   max-height: 100%;
 
   width: auto;
-
   height: auto;
 
   object-fit: contain;
 
   user-select: none;
-
   -webkit-user-select: none;
 
   -webkit-touch-callout: none;
@@ -331,47 +370,60 @@ button {
   font-size: 14px;
 }
 
+/* CLOSE */
+
 .viewer-close {
   position: absolute;
 
-  top: 18px;
+  top: 12px;
+  right: 12px;
 
-  right: 20px;
+  z-index: 10;
 
-  z-index: 5;
+  width: 42px;
+  height: 42px;
 
-  width: 44px;
+  display: flex;
 
-  height: 44px;
+  align-items: center;
+  justify-content: center;
 
   border: 0;
 
   border-radius: 50%;
 
-  background: rgba(
-    255,
-    255,
-    255,
-    0.12
-  );
+  background:
+    rgba(0, 0, 0, 0.55);
 
   color: #ffffff;
 
-  font-size: 30px;
+  font-size: 29px;
 
   line-height: 1;
+
+  box-shadow:
+    0 3px 15px
+      rgba(0, 0, 0, 0.25);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
+.viewer-close:hover {
+  background:
+    rgba(255, 255, 255, 0.18);
+}
+
+/* BOTTOM INSTAGRAM BAR */
+
 .viewer-bottom {
-  position: absolute;
-
-  left: 0;
-
-  right: 0;
-
-  bottom: 0;
+  position: relative;
 
   z-index: 5;
+
+  flex-shrink: 0;
+
+  min-height: 62px;
 
   display: flex;
 
@@ -379,15 +431,22 @@ button {
 
   gap: 14px;
 
-  padding: 14px 4px;
+  padding: 10px 16px;
+
+  background: #050505;
 
   color: #ffffff;
+
+  border-top: 1px solid
+    rgba(255, 255, 255, 0.08);
 }
 
 .viewer-caption {
   flex: 1;
 
   min-width: 0;
+
+  color: #ffffff;
 
   font-size: 14px;
 
@@ -403,7 +462,9 @@ button {
 
   align-items: center;
 
-  gap: 5px;
+  gap: 6px;
+
+  padding: 6px 3px;
 
   border: 0;
 
@@ -415,16 +476,18 @@ button {
 }
 
 .viewer-like span {
-  font-size: 23px;
+  font-size: 25px;
 
   line-height: 1;
 }
 
 .viewer-like.liked {
-  color: #ff4d67;
+  color: #ff3040;
 }
 
-/* ADMIN */
+/* =========================
+   ADMIN
+========================= */
 
 .admin-page {
   min-height: 100vh;
@@ -442,7 +505,6 @@ button {
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
   padding: 18px 24px;
@@ -508,7 +570,6 @@ button {
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   min-height: 120px;
@@ -586,7 +647,6 @@ button {
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
   margin-bottom: 12px;
@@ -628,7 +688,6 @@ button {
 
 .admin-item img {
   width: 72px;
-
   height: 72px;
 
   flex-shrink: 0;
@@ -670,7 +729,9 @@ button {
   color: #d22;
 }
 
-/* TABLET */
+/* =========================
+   TABLET
+========================= */
 
 @media (max-width: 1100px) {
   .gallery-masonry {
@@ -678,7 +739,9 @@ button {
   }
 }
 
-/* MOBILE */
+/* =========================
+   MOBILE
+========================= */
 
 @media (max-width: 700px) {
   .topbar {
@@ -728,32 +791,60 @@ button {
     font-size: 18px;
   }
 
+  /* MOBILE MODAL */
+
   .viewer {
-    padding: 8px;
+    padding: 10px;
+  }
+
+  .viewer-content {
+    width: 100%;
+    height: calc(100vh - 20px);
+
+    max-height: none;
+
+    border-radius: 14px;
   }
 
   .viewer-image-wrap {
-    height: calc(
-      100vh - 90px
-    );
+    flex: 1;
+
+    min-height: 0;
+  }
+
+  .viewer-image {
+    max-width: 100%;
+    max-height: 100%;
   }
 
   .viewer-bottom {
-    padding: 10px 3px;
+    min-height: 58px;
+
+    padding:
+      9px 13px
+      calc(9px + env(safe-area-inset-bottom));
   }
 
   .viewer-caption {
     font-size: 13px;
   }
 
-  .viewer-close {
-    top: 12px;
+  .viewer-like {
+    font-size: 13px;
+  }
 
-    right: 12px;
+  .viewer-like span {
+    font-size: 24px;
+  }
+
+  .viewer-close {
+    top: 10px;
+    right: 10px;
 
     width: 40px;
-
     height: 40px;
+
+    font-size: 27px;
   }
 
   .admin-header {
@@ -770,7 +861,6 @@ button {
 
   .admin-item img {
     width: 58px;
-
     height: 58px;
   }
 
