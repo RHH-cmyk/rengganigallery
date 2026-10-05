@@ -264,20 +264,74 @@ function AdminPanel({
   onRefresh,
   onLogout,
 }: AdminPanelProps) {
-  const [image, setImage] = useState<File | null>(null);
+  const [imageBase64, setImageBase64] = useState("");
+  const [imageName, setImageName] = useState("");
+  const [imageMimeType, setImageMimeType] = useState("");
   const [caption, setCaption] = useState("");
+  const [reading, setReading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  function handleImageChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setReading(true);
+    setImageBase64("");
+    setImageName(file.name);
+    setImageMimeType(file.type || "image/jpeg");
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = String(reader.result);
+
+      const commaIndex = result.indexOf(",");
+
+      if (commaIndex === -1) {
+        setImageBase64("");
+        setReading(false);
+        alert("Format gambar tidak valid.");
+        return;
+      }
+
+      const base64 = result.substring(
+        commaIndex + 1
+      );
+
+      setImageBase64(base64);
+      setReading(false);
+    };
+
+    reader.onerror = () => {
+      setImageBase64("");
+      setReading(false);
+
+      alert(
+        "Gambar tidak bisa dibaca oleh browser. Coba pilih gambar dari penyimpanan HP."
+      );
+    };
+
+    reader.readAsDataURL(file);
+  }
+
   async function upload() {
-    if (!image) {
+    if (reading) {
+      alert("Tunggu gambar selesai dibaca.");
+      return;
+    }
+
+    if (!imageBase64) {
       alert("Pilih gambar terlebih dahulu.");
       return;
     }
 
     try {
       setUploading(true);
-
-      const base64 = await fileToBase64(image);
 
       const response = await fetch(API_URL, {
         method: "POST",
@@ -287,8 +341,8 @@ function AdminPanel({
         body: JSON.stringify({
           action: "upload",
           adminKey: ADMIN_KEY,
-          imageBase64: base64,
-          mimeType: image.type,
+          imageBase64,
+          mimeType: imageMimeType,
           caption,
         }),
       });
@@ -301,7 +355,7 @@ function AdminPanel({
         data = JSON.parse(text);
       } catch {
         throw new Error(
-          `Server mengirim response yang tidak valid.`
+          "Server mengirim response yang tidak valid."
         );
       }
 
@@ -313,7 +367,9 @@ function AdminPanel({
 
       alert("Gambar berhasil diupload.");
 
-      setImage(null);
+      setImageBase64("");
+      setImageName("");
+      setImageMimeType("");
       setCaption("");
 
       const input =
@@ -368,7 +424,9 @@ function AdminPanel({
       if (data.success) {
         await onRefresh();
       } else {
-        alert(data.message || "Gagal menghapus.");
+        alert(
+          data.message || "Gagal menghapus."
+        );
       }
     } catch (error) {
       console.error("Delete gagal:", error);
@@ -405,21 +463,18 @@ function AdminPanel({
             className="file-label"
             htmlFor="image-upload"
           >
-            {image
-              ? image.name
-              : "Pilih gambar dari HP"}
+            {reading
+              ? "Membaca gambar..."
+              : imageName
+                ? imageName
+                : "Pilih gambar dari HP"}
           </label>
 
           <input
             id="image-upload"
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            onChange={(event) => {
-              const file =
-                event.target.files?.[0] || null;
-
-              setImage(file);
-            }}
+            onChange={handleImageChange}
           />
 
           <textarea
@@ -433,11 +488,17 @@ function AdminPanel({
           <button
             className="upload-button"
             onClick={upload}
-            disabled={uploading}
+            disabled={
+              reading ||
+              uploading ||
+              !imageBase64
+            }
           >
-            {uploading
-              ? "Mengupload..."
-              : "Upload"}
+            {reading
+              ? "Membaca gambar..."
+              : uploading
+                ? "Mengupload..."
+                : "Upload"}
           </button>
         </section>
 
@@ -491,25 +552,6 @@ function AdminPanel({
       </main>
     </div>
   );
-}
-
-async function fileToBase64(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-
-  let binary = "";
-  const chunkSize = 8192;
-
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(
-      i,
-      Math.min(i + chunkSize, bytes.length)
-    );
-
-    binary += String.fromCharCode(...chunk);
-  }
-
-  return btoa(binary);
 }
 
 export default App;
