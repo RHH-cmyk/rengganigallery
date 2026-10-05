@@ -37,10 +37,11 @@ function App() {
       setLoading(true);
 
       const response = await fetch(`${API_URL}?action=posts`);
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
 
       if (data.success) {
-        setPosts(data.posts);
+        setPosts(data.posts || []);
       }
     } catch (error) {
       console.error("Gagal mengambil gallery:", error);
@@ -77,13 +78,17 @@ function App() {
     try {
       const response = await fetch(API_URL, {
         method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
         body: JSON.stringify({
           action: "like",
           id,
         }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
 
       if (data.success) {
         localStorage.setItem(likedKey, "1");
@@ -123,6 +128,9 @@ function App() {
     try {
       await fetch(API_URL, {
         method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
         body: JSON.stringify({
           action: "view",
           id,
@@ -183,9 +191,7 @@ function App() {
                   </button>
 
                   <div className="card-bottom">
-                    <p className="caption">
-                      {post.caption}
-                    </p>
+                    <p className="caption">{post.caption}</p>
 
                     <button
                       className={`like-button ${
@@ -247,13 +253,11 @@ function App() {
   );
 }
 
-
 type AdminPanelProps = {
   posts: Post[];
   onRefresh: () => void;
   onLogout: () => void;
 };
-
 
 function AdminPanel({
   posts,
@@ -275,22 +279,40 @@ function AdminPanel({
 
       const base64 = await fileToBase64(image);
 
-      const response = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "upload",
-          adminKey: ADMIN_KEY,
-          imageBase64: base64,
-          mimeType: image.type,
-          caption,
-        }),
+      const payload = JSON.stringify({
+        action: "upload",
+        adminKey: ADMIN_KEY,
+        imageBase64: base64,
+        mimeType: image.type,
+        caption,
       });
 
-      const data = await response.json();
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+        body: payload,
+      });
+
+      const text = await response.text();
+
+      console.log("Upload response:", text);
+
+      let data;
+
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          `Response server tidak valid: ${text.substring(0, 300)}`
+        );
+      }
 
       if (!data.success) {
-        alert(data.message || "Upload gagal.");
-        return;
+        throw new Error(
+          data.message || "Server menolak upload."
+        );
       }
 
       alert("Gambar berhasil diupload.");
@@ -307,10 +329,16 @@ function AdminPanel({
         input.value = "";
       }
 
-      onRefresh();
+      await onRefresh();
     } catch (error) {
-      console.error(error);
-      alert("Upload gagal.");
+      console.error("UPLOAD ERROR:", error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Terjadi kesalahan yang tidak diketahui.";
+
+      alert(`Upload gagal.\n\n${message}`);
     } finally {
       setUploading(false);
     }
@@ -328,6 +356,9 @@ function AdminPanel({
     try {
       const response = await fetch(API_URL, {
         method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
         body: JSON.stringify({
           action: "delete",
           adminKey: ADMIN_KEY,
@@ -335,16 +366,21 @@ function AdminPanel({
         }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      const data = JSON.parse(text);
 
       if (data.success) {
-        onRefresh();
+        await onRefresh();
       } else {
         alert(data.message || "Gagal menghapus.");
       }
     } catch (error) {
-      console.error(error);
-      alert("Gagal menghapus.");
+      console.error("Delete gagal:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Gagal menghapus."
+      );
     }
   }
 
@@ -460,7 +496,6 @@ function AdminPanel({
   );
 }
 
-
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -491,6 +526,5 @@ function fileToBase64(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
-
 
 export default App;
