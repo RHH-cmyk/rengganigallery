@@ -11,14 +11,17 @@ html {
 body {
   margin: 0;
   padding: 0;
+
   font-family:
     Inter,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+
   background: #fafafa;
   color: #111;
+
   -webkit-font-smoothing: antialiased;
 }
 
@@ -33,7 +36,7 @@ button {
 }
 
 /* =====================================================
-   APP
+   PUBLIC
 ===================================================== */
 
 .app {
@@ -41,54 +44,52 @@ button {
   background: #fafafa;
 }
 
-/* =====================================================
-   HEADER
-===================================================== */
+/* HEADER */
 
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 50;
 
-  height: 66px;
+  height: 64px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 28px;
+  padding: 0 26px;
 
-  background: rgba(250, 250, 250, 0.88);
+  background:
+    rgba(250, 250, 250, 0.88);
 
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom:
+    1px solid
+    rgba(0, 0, 0, 0.06);
 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
 }
 
 .brand {
   font-size: 21px;
   font-weight: 750;
   letter-spacing: -0.7px;
-  color: #111;
 }
 
 .admin-button {
   border: 0;
+  border-radius: 9px;
+
+  padding: 8px 12px;
+
   background: transparent;
 
-  padding: 9px 12px;
-
-  color: #777;
+  color: #666;
 
   font-size: 13px;
-  font-weight: 500;
-
-  border-radius: 10px;
-
-  transition:
-    background 0.2s ease,
-    color 0.2s ease;
 }
 
 .admin-button:hover {
@@ -96,37 +97,35 @@ button {
   color: #111;
 }
 
-/* =====================================================
-   GALLERY
-===================================================== */
+/* MASONRY */
 
 .gallery-page {
   width: 100%;
-  max-width: 1700px;
+  max-width: 1750px;
 
-  margin: 0 auto;
+  margin: auto;
 
   padding:
-    22px
-    22px
+    20px
+    20px
     60px;
 }
 
 .gallery-masonry {
   columns: 5 220px;
-  column-gap: 13px;
+  column-gap: 12px;
 }
 
 .gallery-card {
-  display: inline-block;
-
   width: 100%;
 
-  margin: 0 0 13px;
+  display: inline-block;
 
-  vertical-align: top;
+  margin-bottom: 12px;
 
   break-inside: avoid;
+
+  vertical-align: top;
 }
 
 .image-button {
@@ -140,33 +139,13 @@ button {
 
   border: 0;
 
-  border-radius: 14px;
+  border-radius: 13px;
 
   overflow: hidden;
 
-  background: #eeeeee;
+  background: #ededed;
 
   line-height: 0;
-}
-
-.image-button::after {
-  content: "";
-
-  position: absolute;
-
-  inset: 0;
-
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0),
-      rgba(0, 0, 0, 0)
-    );
-
-  pointer-events: none;
-
-  transition:
-    background 0.3s ease;
 }
 
 .image-button img {
@@ -175,49 +154,32 @@ button {
   width: 100%;
   height: auto;
 
-  border-radius: 14px;
-
   transition:
-    transform 0.45s
+    transform 0.4s
       cubic-bezier(
         0.2,
         0.7,
         0.2,
         1
-      ),
-    filter 0.3s ease;
+      );
 }
 
 .image-button:hover img {
   transform: scale(1.025);
 }
 
-.image-button:hover::after {
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0),
-      rgba(0, 0, 0, 0.04)
-    );
-}
-
-/* =====================================================
-   CARD INFO
-===================================================== */
-
 .card-bottom {
-  display: flex;
+  min-height: 30px;
 
+  display: flex;
   align-items: center;
 
-  gap: 10px;
-
-  min-height: 31px;
+  gap: 8px;
 
   padding:
     6px
-    3px
-    1px;
+    2px
+    0;
 }
 
 .caption {
@@ -233,70 +195,49 @@ button {
 
   line-height: 1.4;
 
-  overflow: hidden;
+  overflow-wrap: anywhere;
 
   display: -webkit-box;
 
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+
+  overflow: hidden;
 }
 
 .like-button {
   flex-shrink: 0;
 
   display: flex;
-
   align-items: center;
 
   gap: 4px;
 
-  padding: 4px 2px;
-
   border: 0;
+
+  padding: 4px 2px;
 
   background: transparent;
 
   color: #777;
 
   font-size: 12px;
-
-  transition:
-    color 0.2s ease,
-    transform 0.15s ease;
-}
-
-.like-button:active {
-  transform: scale(0.88);
 }
 
 .like-button span {
   font-size: 20px;
-
   line-height: 1;
-
-  transition:
-    transform 0.2s ease;
 }
 
 .like-button.liked {
   color: #ff3040;
 }
 
-.like-button.liked span {
-  transform: scale(1.05);
-}
-
-/* =====================================================
-   EMPTY / LOADING
-===================================================== */
-
 .state {
-  min-height: 360px;
+  min-height: 350px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
   color: #999;
@@ -305,77 +246,59 @@ button {
 }
 
 /* =====================================================
-   INSTAGRAM STYLE LIGHTBOX
+   MODAL BACKGROUND
 ===================================================== */
 
-.viewer {
+.modal-layer {
   position: fixed;
 
   inset: 0;
 
-  z-index: 200;
+  z-index: 300;
 
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   padding: 30px;
 
   overflow: hidden;
-
-  animation:
-    viewerAppear
-    0.22s
-    ease-out;
 }
 
-@keyframes viewerAppear {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-/* blurred page behind modal */
-
-.viewer-backdrop {
+.modal-backdrop {
   position: absolute;
 
-  inset: -60px;
+  inset: -50px;
 
   background:
-    rgba(10, 10, 10, 0.76);
+    rgba(0, 0, 0, 0.68);
 
   backdrop-filter:
-    blur(32px)
-    saturate(0.75);
+    blur(26px)
+    saturate(0.65);
 
   -webkit-backdrop-filter:
-    blur(32px)
-    saturate(0.75);
+    blur(26px)
+    saturate(0.65);
 }
 
 /* =====================================================
-   MODAL
+   INSTAGRAM POST
 ===================================================== */
 
-.viewer-content {
+.post-modal {
   position: relative;
 
   z-index: 5;
 
   width: min(
-    1120px,
+    1100px,
     94vw
   );
 
   height: min(
-    820px,
+    760px,
     88vh
   );
 
@@ -383,21 +306,21 @@ button {
 
   grid-template-columns:
     minmax(0, 1fr)
-    310px;
+    340px;
 
   overflow: hidden;
 
   background: #fff;
 
-  border-radius: 18px;
+  border-radius: 12px;
 
   box-shadow:
     0 30px 100px
-      rgba(0, 0, 0, 0.48);
+      rgba(0, 0, 0, 0.5);
 
   animation:
-    modalAppear
-    0.25s
+    modalOpen
+    0.22s
     cubic-bezier(
       0.2,
       0.8,
@@ -406,27 +329,29 @@ button {
     );
 }
 
-@keyframes modalAppear {
+@keyframes modalOpen {
   from {
     opacity: 0;
+
     transform:
-      translateY(12px)
-      scale(0.975);
+      scale(0.96)
+      translateY(8px);
   }
 
   to {
     opacity: 1;
+
     transform:
-      translateY(0)
-      scale(1);
+      scale(1)
+      translateY(0);
   }
 }
 
 /* =====================================================
-   MODAL IMAGE
+   PHOTO
 ===================================================== */
 
-.viewer-image-wrap {
+.post-photo {
   position: relative;
 
   min-width: 0;
@@ -439,34 +364,12 @@ button {
 
   overflow: hidden;
 
-  background:
-    #111;
+  background: #111;
 
   touch-action: none;
 }
 
-.viewer-image-wrap::before {
-  content: "";
-
-  position: absolute;
-
-  inset: 0;
-
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(255,255,255,0.025),
-      rgba(0,0,0,0.2)
-    );
-
-  pointer-events: none;
-}
-
-.viewer-image {
-  position: relative;
-
-  z-index: 2;
-
+.modal-image {
   display: block;
 
   max-width: 100%;
@@ -488,40 +391,120 @@ button {
   opacity: 0;
 
   transition:
-    opacity 0.22s ease;
+    opacity 0.2s ease;
 }
 
-.viewer-image-loaded {
+.modal-image-ready {
   opacity: 1;
 }
 
-.viewer-image:active {
+.modal-image:active {
   cursor: grabbing;
 }
 
-.viewer-loading {
+.photo-loading {
   position: absolute;
 
-  z-index: 1;
-
-  color: rgba(
-    255,
-    255,
-    255,
-    0.7
-  );
+  color:
+    rgba(255, 255, 255, 0.65);
 
   font-size: 13px;
 }
 
-/* =====================================================
-   MODAL RIGHT PANEL
-===================================================== */
+.zoom-reset {
+  position: absolute;
 
-.viewer-bottom {
-  position: relative;
+  left: 14px;
+  bottom: 14px;
 
   z-index: 10;
+
+  border: 0;
+
+  border-radius: 20px;
+
+  padding:
+    7px
+    12px;
+
+  background:
+    rgba(0, 0, 0, 0.58);
+
+  color: white;
+
+  font-size: 11px;
+
+  backdrop-filter: blur(10px);
+}
+
+/* =====================================================
+   POST INFO
+===================================================== */
+
+.post-info {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  background: #fff;
+
+  border-left:
+    1px solid
+    #eeeeee;
+}
+
+/* USER HEADER */
+
+.post-header {
+  height: 68px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding:
+    0
+    16px;
+
+  border-bottom:
+    1px solid
+    #eeeeee;
+}
+
+.post-avatar {
+  width: 34px;
+  height: 34px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #111,
+      #777
+    );
+
+  color: white;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.post-user {
+  flex: 1;
 
   min-width: 0;
 
@@ -529,105 +512,138 @@ button {
 
   flex-direction: column;
 
-  justify-content: flex-end;
-
-  padding: 22px;
-
-  background: #fff;
-
-  color: #111;
-
-  border-left:
-    1px solid
-    rgba(0, 0, 0, 0.07);
+  gap: 1px;
 }
 
-.viewer-caption {
+.post-user strong {
+  font-size: 13px;
+}
+
+.post-user span {
+  color: #888;
+
+  font-size: 11px;
+}
+
+.post-more {
+  border: 0;
+
+  padding: 8px;
+
+  background: transparent;
+
+  color: #555;
+
+  letter-spacing: 1px;
+}
+
+/* CAPTION */
+
+.post-caption {
   flex: 1;
 
   min-height: 0;
 
   overflow-y: auto;
 
-  padding-top: 6px;
+  padding: 18px 16px;
 
-  color: #222;
+  color: #333;
 
-  font-size: 14px;
+  font-size: 13px;
 
-  line-height: 1.65;
+  line-height: 1.6;
 
   overflow-wrap: anywhere;
-
-  scrollbar-width: thin;
 }
 
-.viewer-like {
-  flex-shrink: 0;
+.post-caption strong {
+  margin-right: 4px;
 
-  width: 100%;
+  color: #111;
+}
 
+/* ACTIONS */
+
+.post-actions {
   display: flex;
 
   align-items: center;
 
-  gap: 8px;
-
-  margin-top: 18px;
+  gap: 14px;
 
   padding:
-    13px
-    0;
+    12px
+    16px
+    4px;
+}
 
+.modal-like,
+.modal-action {
   border: 0;
 
-  border-top:
-    1px solid
-    #eeeeee;
+  padding: 0;
 
   background: transparent;
 
-  color: #333;
+  color: #222;
 
-  font-size: 14px;
-
-  font-weight: 500;
-
-  text-align: left;
-
-  transition:
-    color 0.2s ease,
-    transform 0.15s ease;
-}
-
-.viewer-like:active {
-  transform: scale(0.98);
-}
-
-.viewer-like span {
-  font-size: 25px;
+  font-size: 27px;
 
   line-height: 1;
 }
 
-.viewer-like.liked {
+.modal-like.liked {
   color: #ff3040;
 }
 
-/* =====================================================
-   CLOSE
-===================================================== */
+.modal-action {
+  font-size: 23px;
+}
 
-.viewer-close {
+/* LIKES */
+
+.post-likes {
+  padding:
+    7px
+    16px;
+
+  color: #222;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+/* DATE */
+
+.post-date {
+  padding:
+    5px
+    16px
+    18px;
+
+  color: #aaa;
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+/* CLOSE */
+
+.modal-close {
   position: absolute;
 
-  top: -52px;
-  right: 0;
+  top: 18px;
+  right: 20px;
 
-  z-index: 20;
+  z-index: 500;
 
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
 
   display: flex;
 
@@ -639,27 +655,16 @@ button {
   border-radius: 50%;
 
   background:
-    rgba(255,255,255,0.15);
+    rgba(0, 0, 0, 0.6);
 
-  color: #fff;
+  color: white;
 
   font-size: 27px;
 
   line-height: 1;
 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
-}
-
-.viewer-close:hover {
-  background:
-    rgba(255,255,255,0.25);
-
-  transform: rotate(4deg);
+  backdrop-filter:
+    blur(10px);
 }
 
 /* =====================================================
@@ -677,32 +682,25 @@ button {
 
   top: 0;
 
-  z-index: 30;
+  z-index: 40;
 
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
-  padding: 18px 24px;
+  padding:
+    18px
+    24px;
 
-  background: rgba(
-    255,
-    255,
-    255,
-    0.94
-  );
+  background:
+    rgba(255, 255, 255, 0.94);
 
   border-bottom:
-    1px solid
-    #eeeeee;
+    1px solid #eee;
 
   backdrop-filter:
-    blur(18px);
-
-  -webkit-backdrop-filter:
-    blur(18px);
+    blur(16px);
 }
 
 .admin-header h1 {
@@ -712,7 +710,10 @@ button {
 }
 
 .admin-header p {
-  margin: 4px 0 0;
+  margin:
+    4px
+    0
+    0;
 
   color: #777;
 
@@ -721,8 +722,7 @@ button {
 
 .logout-button {
   border:
-    1px solid
-    #dddddd;
+    1px solid #ddd;
 
   border-radius: 9px;
 
@@ -730,7 +730,7 @@ button {
     9px
     13px;
 
-  background: #fff;
+  background: white;
 }
 
 .admin-content {
@@ -739,7 +739,7 @@ button {
     100%
   );
 
-  margin: 0 auto;
+  margin: auto;
 
   padding: 24px;
 }
@@ -747,17 +747,12 @@ button {
 .upload-box {
   padding: 20px;
 
-  background: #fff;
+  background: white;
 
   border:
-    1px solid
-    #e8e8e8;
+    1px solid #e8e8e8;
 
-  border-radius: 15px;
-
-  box-shadow:
-    0 5px 25px
-      rgba(0,0,0,0.035);
+  border-radius: 14px;
 }
 
 .upload-box h2,
@@ -771,7 +766,6 @@ button {
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   min-height: 120px;
@@ -781,8 +775,7 @@ button {
   padding: 20px;
 
   border:
-    2px dashed
-    #d7d7d7;
+    2px dashed #d7d7d7;
 
   border-radius: 12px;
 
@@ -809,16 +802,11 @@ button {
   resize: vertical;
 
   border:
-    1px solid
-    #dddddd;
+    1px solid #ddd;
 
   border-radius: 10px;
 
   outline: none;
-}
-
-.upload-box textarea:focus {
-  border-color: #999;
 }
 
 .upload-button {
@@ -834,15 +822,13 @@ button {
 
   background: #111;
 
-  color: #fff;
+  color: white;
 
   font-weight: 600;
 }
 
 .upload-button:disabled {
   opacity: 0.5;
-
-  cursor: not-allowed;
 }
 
 .admin-posts {
@@ -853,7 +839,6 @@ button {
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
   margin-bottom: 12px;
@@ -861,8 +846,7 @@ button {
 
 .admin-posts-title button {
   border:
-    1px solid
-    #dddddd;
+    1px solid #ddd;
 
   border-radius: 8px;
 
@@ -870,7 +854,7 @@ button {
     7px
     12px;
 
-  background: #fff;
+  background: white;
 }
 
 .admin-list {
@@ -890,11 +874,10 @@ button {
 
   padding: 10px;
 
-  background: #fff;
+  background: white;
 
   border:
-    1px solid
-    #e8e8e8;
+    1px solid #e8e8e8;
 
   border-radius: 12px;
 }
@@ -918,7 +901,9 @@ button {
 
 .admin-item-info p {
   margin:
-    0 0 5px;
+    0
+    0
+    5px;
 
   font-size: 14px;
 
@@ -940,7 +925,7 @@ button {
     8px
     11px;
 
-  background: #eeeeee;
+  background: #eee;
 
   color: #d22;
 }
@@ -951,13 +936,13 @@ button {
 
 @media (max-width: 1100px) {
   .gallery-masonry {
-    columns: 4 200px;
+    columns: 4 190px;
   }
 
-  .viewer-content {
+  .post-modal {
     grid-template-columns:
       minmax(0, 1fr)
-      280px;
+      300px;
   }
 }
 
@@ -980,7 +965,7 @@ button {
 
   .gallery-page {
     padding:
-      9px
+      10px
       7px
       40px;
   }
@@ -995,20 +980,23 @@ button {
     margin-bottom: 7px;
   }
 
-  .image-button,
+  .image-button {
+    border-radius: 8px;
+  }
+
   .image-button img {
-    border-radius: 9px;
+    border-radius: 8px;
   }
 
   .card-bottom {
-    min-height: 28px;
-
-    gap: 4px;
+    min-height: 27px;
 
     padding:
       4px
       2px
       0;
+
+    gap: 4px;
   }
 
   .caption {
@@ -1017,122 +1005,127 @@ button {
 
   .like-button {
     font-size: 11px;
-
-    padding:
-      3px
-      1px;
   }
 
   .like-button span {
     font-size: 18px;
   }
 
-  /* =========================
-     MOBILE MODAL
-  ========================= */
+  /* MODAL */
 
-  .viewer {
-    padding: 10px;
+  .modal-layer {
+    padding: 0;
   }
 
-  .viewer-content {
+  .post-modal {
     width: 100%;
+    height: 100%;
 
-    height:
-      calc(
-        100vh - 20px
-      );
-
+    max-width: none;
     max-height: none;
 
     display: flex;
 
     flex-direction: column;
 
-    border-radius: 16px;
+    border-radius: 0;
 
-    box-shadow:
-      0 25px 70px
-        rgba(0,0,0,0.5);
+    box-shadow: none;
   }
 
-  .viewer-image-wrap {
+  .post-photo {
     flex: 1;
 
     min-height: 0;
 
     width: 100%;
+
+    background: #111;
   }
 
-  .viewer-image {
+  .modal-image {
     max-width: 100%;
     max-height: 100%;
   }
 
-  .viewer-bottom {
-    flex-shrink: 0;
+  .post-info {
+    flex: 0 0 auto;
 
-    min-height: 67px;
-
-    padding:
-      11px
-      14px
-      calc(
-        11px +
-        env(safe-area-inset-bottom)
-      );
+    max-height: 34vh;
 
     border-left: 0;
 
     border-top:
-      1px solid
-      rgba(0,0,0,0.06);
+      1px solid #eee;
   }
 
-  .viewer-caption {
-    flex: 0 1 auto;
+  .post-header {
+    height: 55px;
+
+    padding:
+      0
+      14px;
+  }
+
+  .post-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .post-caption {
+    flex: none;
 
     max-height: 75px;
 
-    padding: 0;
+    padding:
+      10px
+      14px;
 
-    font-size: 13px;
-
-    line-height: 1.45;
+    font-size: 12px;
   }
 
-  .viewer-like {
-    width: auto;
-
-    margin-top: 8px;
-
+  .post-actions {
     padding:
       8px
-      0
-      0;
-
-    border-top: 0;
-
-    font-size: 13px;
+      14px
+      2px;
   }
 
-  .viewer-like span {
-    font-size: 23px;
+  .modal-like,
+  .modal-action {
+    font-size: 24px;
   }
 
-  .viewer-close {
-    position: absolute;
+  .post-likes {
+    padding:
+      4px
+      14px;
 
-    top: 9px;
-    right: 9px;
+    font-size: 11px;
+  }
 
-    width: 40px;
-    height: 40px;
+  .post-date {
+    padding:
+      3px
+      14px
+      10px;
 
-    font-size: 26px;
+    font-size: 9px;
+  }
 
-    background:
-      rgba(0,0,0,0.48);
+  .modal-close {
+    top: 10px;
+    right: 10px;
+
+    width: 38px;
+    height: 38px;
+
+    font-size: 25px;
+  }
+
+  .zoom-reset {
+    left: 10px;
+    bottom: 10px;
   }
 
   /* ADMIN */
@@ -1164,32 +1157,5 @@ button {
       9px;
 
     font-size: 12px;
-  }
-}
-
-/* =====================================================
-   VERY SMALL PHONES
-===================================================== */
-
-@media (max-width: 380px) {
-  .gallery-masonry {
-    column-gap: 5px;
-  }
-
-  .gallery-card {
-    margin-bottom: 6px;
-  }
-
-  .viewer {
-    padding: 7px;
-  }
-
-  .viewer-content {
-    height:
-      calc(
-        100vh - 14px
-      );
-
-    border-radius: 14px;
   }
 }
