@@ -171,13 +171,12 @@ function App() {
     countView(post.id);
   }
 
-  // Animasi penutup state
   function closePost() {
     setClosing(true);
     setTimeout(() => {
       setSelected(null);
       setClosing(false);
-    }, 350); // Sesuai durasi CSS transisi (0.35s)
+    }, 350); 
   }
 
   if (admin) {
@@ -408,7 +407,6 @@ function PostModal({
       onClick={onClose}
     >
       <div className="modal-backdrop" />
-
       <button
         className="modal-close"
         onClick={onClose}
@@ -423,7 +421,6 @@ function PostModal({
       >
         <div className="post-photo">
           {!loaded && <div className="photo-loading">Memuat...</div>}
-
           <img
             className={`modal-image ${loaded ? "modal-image-ready" : ""}`}
             src={post.image_url}
@@ -438,7 +435,6 @@ function PostModal({
               transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
             }}
           />
-
           {scale > 1 && (
             <button className="zoom-reset" onClick={resetZoom}>
               Reset
@@ -509,7 +505,7 @@ function formatDate(value: string) {
 }
 
 /* =====================================================
-   ADMIN
+   ADMIN PANEL WITH PROGRESS TRACKING & GLASS UI
 ===================================================== */
 
 type AdminPanelProps = {
@@ -525,6 +521,7 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
   const [caption, setCaption] = useState("");
   const [reading, setReading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -555,6 +552,39 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
     reader.readAsDataURL(file);
   }
 
+  // Fungsi khusus melacak progres upload dengan XMLHttpRequest
+  const uploadWithProgress = (payload: string) => {
+    return new Promise<any>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", API_URL, true);
+      xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
+
+      // Melacak progres payload
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
+          } catch (e) {
+            resolve({ success: false, message: "Invalid response from server" });
+          }
+        } else {
+          reject(new Error("Gagal menyambung ke server. HTTP " + xhr.status));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error("Terjadi kesalahan jaringan (Network Error)"));
+      xhr.send(payload);
+    });
+  };
+
   async function upload() {
     if (reading) {
       alert("Tunggu gambar selesai dibaca.");
@@ -567,21 +597,18 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
 
     try {
       setUploading(true);
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
-        body: JSON.stringify({
-          action: "upload",
-          adminKey: ADMIN_KEY,
-          imageBase64,
-          mimeType: imageMimeType,
-          caption,
-        }),
+      setUploadProgress(0);
+
+      const payload = JSON.stringify({
+        action: "upload",
+        adminKey: ADMIN_KEY,
+        imageBase64,
+        mimeType: imageMimeType,
+        caption,
       });
 
-      const data = await response.json();
+      const data = await uploadWithProgress(payload);
+
       if (!data.success) {
         throw new Error(data.message || "Upload gagal.");
       }
@@ -607,6 +634,7 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
       );
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   }
 
@@ -652,12 +680,13 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
       </header>
 
       <main className="admin-content">
-        <section className="upload-box">
-          <h2>Upload gambar</h2>
+        <section className="upload-box glass-panel">
+          <h2>Upload gambar baru</h2>
+          
           <label className="file-label" htmlFor="image-upload">
             {reading
               ? "Membaca gambar..."
-              : imageName || "Pilih gambar dari HP"}
+              : imageName || "Ketuk untuk pilih gambar dari HP"}
           </label>
           <input
             id="image-upload"
@@ -665,11 +694,22 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
             accept="image/jpeg,image/png,image/webp"
             onChange={handleImageChange}
           />
+          
           <textarea
-            placeholder="Caption..."
+            placeholder="Tulis caption di sini..."
             value={caption}
             onChange={(event) => setCaption(event.target.value)}
           />
+
+          {uploading && (
+            <div className="progress-bar">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+          )}
+
           <button
             className="upload-button"
             onClick={upload}
@@ -678,15 +718,15 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
             {reading
               ? "Membaca gambar..."
               : uploading
-              ? "Mengupload..."
-              : "Upload"}
+              ? `Mengupload... ${uploadProgress}%`
+              : "Upload Sekarang"}
           </button>
         </section>
 
         <section className="admin-posts">
           <div className="admin-posts-title">
-            <h2>Posting</h2>
-            <button onClick={onRefresh}>Refresh</button>
+            <h2>Posting Tersimpan</h2>
+            <button className="refresh-btn" onClick={onRefresh}>Refresh</button>
           </div>
 
           {posts.length === 0 ? (
@@ -694,10 +734,10 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
           ) : (
             <div className="admin-list">
               {posts.map((post) => (
-                <div className="admin-item" key={post.id}>
+                <div className="admin-item glass-panel" key={post.id}>
                   <img src={post.image_url} alt={post.caption} />
                   <div className="admin-item-info">
-                    <p>{post.caption}</p>
+                    <p>{post.caption || "Tanpa caption"}</p>
                     <small>
                       ♥ {post.likes} · Views {post.views}
                     </small>
