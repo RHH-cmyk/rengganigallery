@@ -832,3 +832,107 @@ button {
   .admin-item img { width: 64px; height: 64px; }
   .admin-item { gap: 12px; padding: 12px; border-radius: 16px; }
 }
+
+/* =====================================================
+   CUSTOM DIALOG UI (ALERTS, CONFIRMS, PROMPTS IOS STYLE)
+===================================================== */
+.glass-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: dialogFadeIn 0.25s ease;
+}
+
+.glass-dialog {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(30px) saturate(2);
+  -webkit-backdrop-filter: blur(30px) saturate(2);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  text-align: center;
+  animation: dialogScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-dialog-content {
+  padding: 22px 18px;
+}
+
+.glass-dialog-content h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #000;
+  letter-spacing: -0.4px;
+}
+
+.glass-dialog-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #222;
+  line-height: 1.35;
+}
+
+.glass-dialog-content input {
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  outline: none;
+  text-align: center;
+  transition: border 0.2s;
+}
+
+.glass-dialog-content input:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+.glass-dialog-actions {
+  display: flex;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.glass-dialog-actions button {
+  flex: 1;
+  padding: 14px;
+  background: transparent;
+  border: 0;
+  font-size: 16px;
+  color: #007aff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.glass-dialog-actions button:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.glass-dialog-actions.split button:first-child {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  font-weight: 400;
+  color: #ff3b30; /* Merah gaya Batal / Cancel iOS */
+}
+
+.glass-dialog-actions button.confirm-btn {
+  font-weight: 600;
+}
+
+@keyframes dialogFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes dialogScaleIn {
+  from { transform: scale(1.1); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
