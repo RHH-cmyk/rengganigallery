@@ -31,19 +31,105 @@ type TouchPoint = {
   clientY: number;
 };
 
+/* =====================================================
+   CUSTOM DIALOG HOOK (PENGGANTI ALERT/CONFIRM BROWSER)
+===================================================== */
+type DialogConfig = {
+  isOpen: boolean;
+  type: "alert" | "confirm" | "prompt";
+  title: string;
+  message: string;
+  inputValue: string;
+  resolve: ((val: any) => void) | null;
+};
+
+function useDialog() {
+  const [config, setConfig] = useState<DialogConfig>({
+    isOpen: false,
+    type: "alert",
+    title: "",
+    message: "",
+    inputValue: "",
+    resolve: null,
+  });
+
+  const showAlert = (title: string, message: string) =>
+    new Promise<void>((resolve) => {
+      setConfig({ isOpen: true, type: "alert", title, message, inputValue: "", resolve: resolve as any });
+    });
+
+  const showConfirm = (title: string, message: string) =>
+    new Promise<boolean>((resolve) => {
+      setConfig({ isOpen: true, type: "confirm", title, message, inputValue: "", resolve });
+    });
+
+  const showPrompt = (title: string, message: string) =>
+    new Promise<string | null>((resolve) => {
+      setConfig({ isOpen: true, type: "prompt", title, message, inputValue: "", resolve });
+    });
+
+  const handleClose = (val: any) => {
+    if (config.resolve) config.resolve(val);
+    setConfig((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const DialogUI = () => {
+    if (!config.isOpen) return null;
+    return (
+      <div className="glass-dialog-overlay" onClick={() => { if(config.type === 'alert') handleClose(undefined)}}>
+        <div className="glass-dialog" onClick={(e) => e.stopPropagation()}>
+          <div className="glass-dialog-content">
+            <h3>{config.title}</h3>
+            <p>{config.message}</p>
+            {config.type === "prompt" && (
+              <input
+                type="password"
+                placeholder="Password"
+                autoFocus
+                value={config.inputValue}
+                onChange={(e) => setConfig((p) => ({ ...p, inputValue: e.target.value }))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleClose(config.inputValue);
+                }}
+              />
+            )}
+          </div>
+          <div className={`glass-dialog-actions ${config.type !== "alert" ? "split" : ""}`}>
+            {config.type !== "alert" && (
+              <button className="cancel-btn" onClick={() => handleClose(config.type === "prompt" ? null : false)}>
+                Batal
+              </button>
+            )}
+            <button className="confirm-btn" onClick={() => handleClose(config.type === "prompt" ? config.inputValue : true)}>
+              {config.type === "alert" ? "OK" : "Lanjut"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return { showAlert, showConfirm, showPrompt, DialogUI };
+}
+
+
+/* =====================================================
+   APP COMPONENT
+===================================================== */
 function App() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Post | null>(null);
   const [closing, setClosing] = useState(false);
   const [admin, setAdmin] = useState(false);
+  
+  const { showAlert, showPrompt, DialogUI } = useDialog();
 
   useEffect(() => {
     loadPosts();
 
     if (window.location.hash === "#admin") {
       const saved = sessionStorage.getItem("gallery_admin");
-
       if (saved === ADMIN_KEY) {
         setAdmin(true);
       }
@@ -52,7 +138,6 @@ function App() {
 
   useEffect(() => {
     document.body.style.overflow = selected ? "hidden" : "";
-
     return () => {
       document.body.style.overflow = "";
     };
@@ -74,15 +159,15 @@ function App() {
     }
   }
 
-  function openAdmin() {
-    const password = window.prompt("Password admin:");
-
+  async function openAdmin() {
+    const password = await showPrompt("Akses Admin", "Masukkan password untuk mengelola gallery:");
+    
     if (password === ADMIN_KEY) {
       sessionStorage.setItem("gallery_admin", ADMIN_KEY);
       window.location.hash = "admin";
       setAdmin(true);
     } else if (password !== null) {
-      alert("Password salah.");
+      await showAlert("Akses Ditolak", "Password yang Anda masukkan salah.");
     }
   }
 
@@ -105,10 +190,7 @@ function App() {
         headers: {
           "Content-Type": "text/plain;charset=utf-8",
         },
-        body: JSON.stringify({
-          action: "like",
-          id,
-        }),
+        body: JSON.stringify({ action: "like", id }),
       });
 
       const data = await response.json();
@@ -117,23 +199,11 @@ function App() {
         localStorage.setItem(likedKey, "1");
 
         setPosts((current) =>
-          current.map((post) =>
-            post.id === id
-              ? {
-                  ...post,
-                  likes: data.likes,
-                }
-              : post
-          )
+          current.map((post) => post.id === id ? { ...post, likes: data.likes } : post)
         );
 
         setSelected((current) =>
-          current && current.id === id
-            ? {
-                ...current,
-                likes: data.likes,
-              }
-            : current
+          current && current.id === id ? { ...current, likes: data.likes } : current
         );
       }
     } catch (error) {
@@ -143,23 +213,15 @@ function App() {
 
   async function countView(id: string) {
     const viewedKey = `gallery_viewed_${id}`;
-
-    if (localStorage.getItem(viewedKey)) {
-      return;
-    }
+    if (localStorage.getItem(viewedKey)) return;
 
     localStorage.setItem(viewedKey, "1");
 
     try {
       await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
-        body: JSON.stringify({
-          action: "view",
-          id,
-        }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "view", id }),
       });
     } catch (error) {
       console.error("View gagal:", error);
@@ -206,27 +268,14 @@ function App() {
         ) : (
           <section className="gallery-masonry">
             {posts.map((post) => {
-              const liked =
-                localStorage.getItem(`gallery_liked_${post.id}`) === "1";
-
+              const liked = localStorage.getItem(`gallery_liked_${post.id}`) === "1";
               return (
                 <article className="gallery-card" key={post.id}>
-                  <button
-                    className="image-button"
-                    onClick={() => openPost(post)}
-                  >
-                    <img
-                      src={post.image_url}
-                      alt={post.caption || "Gallery image"}
-                      loading="lazy"
-                    />
+                  <button className="image-button" onClick={() => openPost(post)}>
+                    <img src={post.image_url} alt={post.caption || "Gallery image"} loading="lazy" />
                   </button>
-
                   <div className="card-bottom">
-                    {post.caption && (
-                      <p className="caption">{post.caption}</p>
-                    )}
-
+                    {post.caption && <p className="caption">{post.caption}</p>}
                     <button
                       className={`like-button ${liked ? "liked" : ""}`}
                       onClick={() => likePost(post.id)}
@@ -245,14 +294,14 @@ function App() {
       {selected && (
         <PostModal
           post={selected}
-          liked={
-            localStorage.getItem(`gallery_liked_${selected.id}`) === "1"
-          }
+          liked={localStorage.getItem(`gallery_liked_${selected.id}`) === "1"}
           isClosing={closing}
           onClose={closePost}
           onLike={() => likePost(selected.id)}
         />
       )}
+      
+      <DialogUI />
     </div>
   );
 }
@@ -269,13 +318,7 @@ type PostModalProps = {
   onLike: () => void;
 };
 
-function PostModal({
-  post,
-  liked,
-  isClosing,
-  onClose,
-  onLike,
-}: PostModalProps) {
+function PostModal({ post, liked, isClosing, onClose, onLike }: PostModalProps) {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState<Point>({ x: 0, y: 0 });
   const [loaded, setLoaded] = useState(false);
@@ -308,7 +351,6 @@ function PostModal({
 
   function touchStart(event: TouchEvent<HTMLImageElement>) {
     event.stopPropagation();
-
     if (event.touches.length >= 2) {
       const first = event.touches[0];
       const second = event.touches[1];
@@ -321,26 +363,18 @@ function PostModal({
       };
       return;
     }
-
     if (event.touches.length === 1) {
       const now = Date.now();
       if (now - lastTap.current < 300) {
-        if (scale > 1) {
-          resetZoom();
-        } else {
-          setScale(2.5);
-        }
+        if (scale > 1) resetZoom();
+        else setScale(2.5);
         lastTap.current = 0;
         return;
       }
-
       lastTap.current = now;
       gesture.current = {
         mode: scale > 1 ? "pan" : "none",
-        startPoint: {
-          x: event.touches[0].clientX,
-          y: event.touches[0].clientY,
-        },
+        startPoint: { x: event.touches[0].clientX, y: event.touches[0].clientY },
         startPosition: position,
         startDistance: 0,
         startScale: scale,
@@ -351,31 +385,21 @@ function PostModal({
   function touchMove(event: TouchEvent<HTMLImageElement>) {
     event.stopPropagation();
     const current = gesture.current;
-
     if (current.mode === "pinch" && event.touches.length >= 2) {
       event.preventDefault();
       const first = event.touches[0];
       const second = event.touches[1];
       const ratio = distance(first, second) / current.startDistance;
-      const nextScale = Math.min(
-        4,
-        Math.max(1, current.startScale * ratio)
-      );
+      const nextScale = Math.min(4, Math.max(1, current.startScale * ratio));
       setScale(nextScale);
-      if (nextScale === 1) {
-        setPosition({ x: 0, y: 0 });
-      }
+      if (nextScale === 1) setPosition({ x: 0, y: 0 });
       return;
     }
-
     if (current.mode === "pan" && event.touches.length === 1 && scale > 1) {
       event.preventDefault();
       const dx = event.touches[0].clientX - current.startPoint.x;
       const dy = event.touches[0].clientY - current.startPoint.y;
-      setPosition({
-        x: current.startPosition.x + dx,
-        y: current.startPosition.y + dy,
-      });
+      setPosition({ x: current.startPosition.x + dx, y: current.startPosition.y + dy });
     }
   }
 
@@ -383,42 +407,23 @@ function PostModal({
     event.stopPropagation();
     if (event.touches.length === 0) {
       gesture.current.mode = "none";
-      if (scale <= 1.02) {
-        resetZoom();
-      }
+      if (scale <= 1.02) resetZoom();
     }
   }
 
   function wheel(event: WheelEvent<HTMLImageElement>) {
     event.preventDefault();
-    const next = Math.min(
-      4,
-      Math.max(1, scale + (event.deltaY > 0 ? -0.2 : 0.2))
-    );
+    const next = Math.min(4, Math.max(1, scale + (event.deltaY > 0 ? -0.2 : 0.2)));
     setScale(next);
-    if (next === 1) {
-      resetZoom();
-    }
+    if (next === 1) resetZoom();
   }
 
   return (
-    <div
-      className={`modal-layer ${isClosing ? "closing" : ""}`}
-      onClick={onClose}
-    >
+    <div className={`modal-layer ${isClosing ? "closing" : ""}`} onClick={onClose}>
       <div className="modal-backdrop" />
-      <button
-        className="modal-close"
-        onClick={onClose}
-        aria-label="Tutup"
-      >
-        ×
-      </button>
+      <button className="modal-close" onClick={onClose} aria-label="Tutup">×</button>
 
-      <article
-        className="post-modal"
-        onClick={(event) => event.stopPropagation()}
-      >
+      <article className="post-modal" onClick={(event) => event.stopPropagation()}>
         <div className="post-photo">
           {!loaded && <div className="photo-loading">Memuat...</div>}
           <img
@@ -435,11 +440,7 @@ function PostModal({
               transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
             }}
           />
-          {scale > 1 && (
-            <button className="zoom-reset" onClick={resetZoom}>
-              Reset
-            </button>
-          )}
+          {scale > 1 && <button className="zoom-reset" onClick={resetZoom}>Reset</button>}
         </div>
 
         <aside className="post-info">
@@ -449,9 +450,7 @@ function PostModal({
               <strong>Renggani</strong>
               <span>Gallery</span>
             </div>
-            <button className="post-more" aria-label="Menu">
-              •••
-            </button>
+            <button className="post-more" aria-label="Menu">•••</button>
           </div>
 
           <div className="post-caption">
@@ -463,18 +462,11 @@ function PostModal({
           </div>
 
           <div className="post-actions">
-            <button
-              className={`modal-like ${liked ? "liked" : ""}`}
-              onClick={onLike}
-            >
+            <button className={`modal-like ${liked ? "liked" : ""}`} onClick={onLike}>
               {liked ? "♥" : "♡"}
             </button>
-            <button className="modal-action" onClick={() => {}}>
-              ♧
-            </button>
-            <button className="modal-action" onClick={() => {}}>
-              ↗
-            </button>
+            <button className="modal-action" onClick={() => {}}>♧</button>
+            <button className="modal-action" onClick={() => {}}>↗</button>
           </div>
 
           <div className="post-likes">
@@ -482,9 +474,7 @@ function PostModal({
           </div>
 
           <div className="post-date">
-            {post.created_at
-              ? formatDate(post.created_at)
-              : "Renggani Gallery"}
+            {post.created_at ? formatDate(post.created_at) : "Renggani Gallery"}
           </div>
         </aside>
       </article>
@@ -494,14 +484,8 @@ function PostModal({
 
 function formatDate(value: string) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "Renggani Gallery";
-  }
-  return date.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  if (Number.isNaN(date.getTime())) return "Renggani Gallery";
+  return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
 }
 
 /* =====================================================
@@ -521,9 +505,10 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
   const [caption, setCaption] = useState("");
   const [reading, setReading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
-  // Progress state
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Hook Custom Dialog untuk admin
+  const { showAlert, showConfirm, DialogUI } = useDialog();
 
   function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -540,7 +525,7 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
       const comma = result.indexOf(",");
       if (comma === -1) {
         setReading(false);
-        alert("Format gambar tidak valid.");
+        showAlert("File Tidak Valid", "Format gambar yang Anda pilih tidak didukung.");
         return;
       }
       setImageBase64(result.substring(comma + 1));
@@ -549,34 +534,32 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
 
     reader.onerror = () => {
       setReading(false);
-      alert("Gambar tidak bisa dibaca.");
+      showAlert("Gagal Membaca", "Terjadi kesalahan saat membaca file gambar.");
     };
     reader.readAsDataURL(file);
   }
 
   async function upload() {
     if (reading) {
-      alert("Tunggu gambar selesai dibaca.");
+      await showAlert("Mohon Tunggu", "Sistem sedang memproses file gambar Anda.");
       return;
     }
     if (!imageBase64) {
-      alert("Pilih gambar terlebih dahulu.");
+      await showAlert("File Kosong", "Silakan pilih gambar terlebih dahulu sebelum upload.");
       return;
     }
 
     setUploading(true);
     setUploadProgress(0);
 
-    // Membuat Progress bayangan (Simulasi) yang bergerak mulus max ke 90%
     const progressInterval = setInterval(() => {
       setUploadProgress((oldProgress) => {
-        if (oldProgress >= 90) return 90; // Mentok di 90% nunggu server balas
-        return oldProgress + Math.floor(Math.random() * 8) + 2; // Nambah random 2-9%
+        if (oldProgress >= 90) return 90;
+        return oldProgress + Math.floor(Math.random() * 8) + 2; 
       });
     }, 400);
 
     try {
-      // Kembali menggunakan fetch murni yang kebal CORS Google Apps Script
       const response = await fetch(API_URL, {
         method: "POST",
         headers: {
@@ -592,30 +575,23 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
       });
 
       const data = await response.json();
-      
-      clearInterval(progressInterval); // Hentikan simulasi progress
+      clearInterval(progressInterval); 
 
       if (!data.success) {
         throw new Error(data.message || "Upload gagal.");
       }
 
-      // Mentokkan bar ke 100% jika sukses
       setUploadProgress(100);
 
-      // Tunggu setengah detik biar animasinya 100% terlihat mulus oleh mata
       setTimeout(async () => {
-        alert("Gambar berhasil diupload.");
+        await showAlert("Berhasil", "Gambar telah berhasil ditambahkan ke Gallery.");
         setImageBase64("");
         setImageName("");
         setImageMimeType("");
         setCaption("");
         
-        const input = document.getElementById(
-          "image-upload"
-        ) as HTMLInputElement | null;
-        if (input) {
-          input.value = "";
-        }
+        const input = document.getElementById("image-upload") as HTMLInputElement | null;
+        if (input) input.value = "";
         
         setUploading(false);
         setUploadProgress(0);
@@ -623,43 +599,36 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
       }, 500);
 
     } catch (error) {
-      clearInterval(progressInterval); // Hentikan simulasi
+      clearInterval(progressInterval); 
       setUploading(false);
       setUploadProgress(0);
-      alert(
-        error instanceof Error
-          ? `Upload gagal.\n\n${error.message}`
-          : "Upload gagal."
-      );
+      await showAlert("Upload Gagal", error instanceof Error ? error.message : "Terjadi kesalahan saat mengupload gambar.");
     }
   }
 
   async function deletePost(id: string) {
-    if (!window.confirm("Hapus gambar ini?")) {
-      return;
-    }
+    const isConfirmed = await showConfirm(
+      "Hapus Gambar?", 
+      "Gambar ini akan dihapus secara permanen dari Gallery. Lanjutkan?"
+    );
+
+    if (!isConfirmed) return;
 
     try {
       const response = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
-        body: JSON.stringify({
-          action: "delete",
-          adminKey: ADMIN_KEY,
-          id,
-        }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "delete", adminKey: ADMIN_KEY, id }),
       });
 
       const data = await response.json();
       if (data.success) {
         await onRefresh();
       } else {
-        alert(data.message || "Gagal menghapus.");
+        await showAlert("Gagal Dihapus", data.message || "Sistem menolak penghapusan.");
       }
     } catch {
-      alert("Gagal menghapus.");
+      await showAlert("Error Jaringan", "Gagal terhubung ke server saat menghapus.");
     }
   }
 
@@ -750,6 +719,8 @@ function AdminPanel({ posts, onRefresh, onLogout }: AdminPanelProps) {
           )}
         </section>
       </main>
+      
+      <DialogUI />
     </div>
   );
 }
