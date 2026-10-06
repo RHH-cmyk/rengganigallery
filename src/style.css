@@ -213,7 +213,7 @@ button {
 .modal-backdrop {
   position: absolute;
   inset: -50px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
 }
@@ -232,7 +232,7 @@ button {
   overflow: hidden;
   background: #fff;
   border-radius: 24px;
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.25);
   animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -320,7 +320,7 @@ button {
 }
 
 /* =====================================================
-   POST INFO
+   POST INFO (DESKTOP)
 ===================================================== */
 
 .post-info {
@@ -488,7 +488,6 @@ button {
 ===================================================== */
 .admin-page {
   min-height: 100vh;
-  /* Background bergradasi halus ala iOS untuk memunculkan efek kaca */
   background-color: #f2f2f7;
   background-image: 
     radial-gradient(at 0% 0%, rgba(210, 225, 255, 0.8) 0px, transparent 50%), 
@@ -497,7 +496,6 @@ button {
   background-attachment: fixed;
 }
 
-/* Base class untuk elemen Glass */
 .glass-panel {
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(24px) saturate(1.8);
@@ -577,11 +575,9 @@ button {
   min-height: 140px;
   margin-top: 16px;
   padding: 20px;
-  
   background: rgba(255, 255, 255, 0.4);
   border: 2px dashed rgba(0, 0, 0, 0.12);
   border-radius: 16px;
-  
   color: #555;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -602,12 +598,10 @@ button {
   margin-top: 16px;
   padding: 16px;
   resize: vertical;
-  
   background: rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 12px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-  
   outline: none;
   font-family: inherit;
   font-size: 14px;
@@ -616,10 +610,9 @@ button {
 
 .upload-box textarea:focus {
   background: #fff;
-  border-color: #007aff; /* Sentuhan biru iOS saat fokus */
+  border-color: #007aff;
 }
 
-/* PROGRESS BAR */
 .progress-bar {
   width: 100%;
   height: 8px;
@@ -632,7 +625,7 @@ button {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #007aff, #34c759); /* iOS blue to green */
+  background: linear-gradient(90deg, #007aff, #34c759);
   width: 0%;
   border-radius: 10px;
   transition: width 0.3s ease-out;
@@ -644,8 +637,7 @@ button {
   padding: 16px;
   border: 0;
   border-radius: 14px;
-  
-  background: #1c1c1e; /* Warna gelap iOS */
+  background: #1c1c1e;
   color: white;
   font-weight: 700;
   font-size: 15px;
@@ -717,7 +709,7 @@ button {
   border: 0;
   border-radius: 12px;
   padding: 10px 16px;
-  background: rgba(255, 59, 48, 0.1); /* iOS red */
+  background: rgba(255, 59, 48, 0.1);
   color: #ff3b30;
   font-weight: 700;
   transition: all 0.2s ease;
@@ -749,50 +741,85 @@ button {
   .like-button { font-size: 12px; }
   .like-button span { font-size: 18px; }
 
-  /* MODAL MOBILE */
+  /* MODAL MOBILE: ROMBAKAN GLASSMORPHISM TEMBUS FOTO */
   .modal-layer { padding: 0; }
+  
   .post-modal {
     width: 100%;
     height: 100%;
     max-width: none;
     max-height: none;
-    display: flex;
-    flex-direction: column;
+    display: block; /* Dibuat block agar bisa overlay absolute */
     border-radius: 0;
     box-shadow: none;
+    background: #000; /* Background hitam murni untuk foto */
   }
+  
   .post-photo {
-    flex: 1;
-    min-height: 0;
+    position: absolute;
+    inset: 0; /* Foto memenuhi seluruh layar */
     width: 100%;
-    background: #111; 
+    height: 100%;
+    background: transparent;
+    z-index: 1; /* Foto ada di layer bawah */
   }
+  
   .modal-image { max-width: 100%; max-height: 100%; }
   
   .post-info {
-    flex: 0 0 auto;
-    max-height: 38vh;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 48vh; /* Batas tinggi info */
     border-left: 0;
-    border-top: 1px solid #f0f0f0;
-    border-radius: 20px 20px 0 0;
-    margin-top: -16px; 
-    z-index: 10;
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 32px 32px 0 0;
+    margin-top: 0; 
+    z-index: 10; /* Berada di atas foto */
+    
+    /* EFEK KACA (GLASS) TEMBUS PANDANG IOS */
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(24px) saturate(2);
+    -webkit-backdrop-filter: blur(24px) saturate(2);
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15);
   }
-  .post-header { height: 64px; padding: 0 16px; }
-  .post-avatar { width: 32px; height: 32px; }
-  .post-caption { flex: none; max-height: 80px; padding: 12px 16px; font-size: 13px; }
-  .post-actions { padding: 8px 16px 4px; }
+  
+  .post-header { 
+    height: 64px; 
+    padding: 0 20px; 
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08); 
+  }
+  
+  .post-avatar { width: 34px; height: 34px; }
+  
+  .post-caption { 
+    flex: none; 
+    max-height: 12vh; 
+    padding: 16px 20px; 
+    font-size: 13px; 
+  }
+  
+  .post-actions { padding: 8px 20px 4px; }
   .modal-like, .modal-action { font-size: 26px; }
-  .post-likes { padding: 4px 16px; font-size: 12px; }
-  .post-date { padding: 4px 16px 16px; font-size: 10px; }
+  .post-likes { padding: 4px 20px; font-size: 12px; }
+  .post-date { padding: 4px 20px 24px; font-size: 10px; }
+  
   .modal-close {
-    top: 16px;
-    right: 16px;
+    top: 20px;
+    right: 20px;
     width: 40px;
     height: 40px;
     font-size: 26px;
   }
-  .zoom-reset { left: 12px; bottom: 32px; }
+  
+  /* Geser posisi Reset ke atas agar tidak tertutup panel glass di bawah */
+  .zoom-reset { 
+    top: 24px; 
+    left: 20px; 
+    bottom: auto; /* Hilangkan settingan bottom dari desktop */
+    z-index: 50; 
+  }
 
   /* ADMIN MOBILE */
   .admin-header {
