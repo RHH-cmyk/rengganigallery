@@ -749,19 +749,20 @@ button {
     height: 100%;
     max-width: none;
     max-height: none;
-    display: block; /* Dibuat block agar bisa overlay absolute */
+    display: block; 
     border-radius: 0;
     box-shadow: none;
-    background: #000; /* Background hitam murni untuk foto */
+    background: #000; 
   }
   
   .post-photo {
     position: absolute;
-    inset: 0; /* Foto memenuhi seluruh layar */
+    inset: 0; 
     width: 100%;
     height: 100%;
     background: transparent;
-    z-index: 1; /* Foto ada di layer bawah */
+    z-index: 1; 
+    padding-bottom: 260px; /* Jarak agar area utama foto tidak tertutup panel */
   }
   
   .modal-image { max-width: 100%; max-height: 100%; }
@@ -771,12 +772,12 @@ button {
     bottom: 0;
     left: 0;
     right: 0;
-    max-height: 48vh; /* Batas tinggi info */
+    max-height: 48vh; 
     border-left: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 32px 32px 0 0;
     margin-top: 0; 
-    z-index: 10; /* Berada di atas foto */
+    z-index: 10; 
     
     /* EFEK KACA (GLASS) TEMBUS PANDANG IOS */
     background: rgba(255, 255, 255, 0.55);
@@ -813,11 +814,10 @@ button {
     font-size: 26px;
   }
   
-  /* Geser posisi Reset ke atas agar tidak tertutup panel glass di bawah */
   .zoom-reset { 
     top: 24px; 
     left: 20px; 
-    bottom: auto; /* Hilangkan settingan bottom dari desktop */
+    bottom: auto; 
     z-index: 50; 
   }
 
